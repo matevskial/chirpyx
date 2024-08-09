@@ -14,7 +14,7 @@ func (healthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	/* note that the line below is not really needed if w.Write is called, since 200 would be assumed
 	This is used for setting custom status codes
 	*/
-	w.WriteHeader(200)
+	w.WriteHeader(http.StatusOK)
 	_, err := w.Write([]byte(responseString))
 	if err != nil {
 		http.Error(w, "Internal server error", 500)
