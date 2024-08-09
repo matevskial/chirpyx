@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -21,15 +22,42 @@ func (healthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+type apiMetrics struct {
+	hits int
+}
+
+func (a *apiMetrics) middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		a.hits++
+		next.ServeHTTP(w, req)
+	})
+}
+
+func (a *apiMetrics) metricsHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte(fmt.Sprintf("Hits: %v", a.hits)))
+	})
+}
+
+func (a *apiMetrics) resetHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		a.hits = 0
+		w.WriteHeader(http.StatusOK)
+	})
+}
+
 func main() {
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
-	httpFileServer := http.FileServer(staticContentDir)
+	httpFileServerMetrics := apiMetrics{}
+	meteredHttpFileServer := httpFileServerMetrics.middleware(http.FileServer(staticContentDir))
 
 	httpServeMux := http.NewServeMux()
 
-	httpServeMux.Handle(httpFileServerPrefix+"*", http.StripPrefix(httpFileServerPrefix, httpFileServer))
+	httpServeMux.Handle(httpFileServerPrefix+"*", http.StripPrefix(httpFileServerPrefix, meteredHttpFileServer))
 	httpServeMux.Handle("/healthz", healthHandler{})
+	httpServeMux.Handle("/metrics", httpFileServerMetrics.metricsHandler())
+	httpServeMux.Handle("/reset", httpFileServerMetrics.resetHandler())
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
