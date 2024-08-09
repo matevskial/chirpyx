@@ -55,10 +55,13 @@ func main() {
 
 	httpServeMux := http.NewServeMux()
 
+	/*
+		[METHOD ][HOST]/[PATH] is the correct format of the path stribg
+	*/
 	httpServeMux.Handle(httpFileServerPrefix+"*", http.StripPrefix(httpFileServerPrefix, meteredHttpFileServer))
-	httpServeMux.Handle("/healthz", healthHandler{})
-	httpServeMux.Handle("/metrics", httpFileServerMetrics.metricsHandler())
-	httpServeMux.Handle("/reset", httpFileServerMetrics.resetHandler())
+	httpServeMux.Handle("GET /healthz", healthHandler{})
+	httpServeMux.Handle("GET /metrics", httpFileServerMetrics.metricsHandler())
+	httpServeMux.Handle("GET /reset", httpFileServerMetrics.resetHandler())
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
