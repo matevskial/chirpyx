@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync/atomic"
 )
 
 type healthHandler struct{}
@@ -23,25 +24,25 @@ func (healthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 type apiMetrics struct {
-	hits int
+	hits atomic.Uint64
 }
 
 func (a *apiMetrics) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		a.hits++
+		a.hits.Add(1)
 		next.ServeHTTP(w, req)
 	})
 }
 
 func (a *apiMetrics) metricsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(fmt.Sprintf("Hits: %v", a.hits)))
+		w.Write([]byte(fmt.Sprintf("Hits: %v", a.hits.Load())))
 	})
 }
 
 func (a *apiMetrics) resetHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		a.hits = 0
+		a.hits.Store(0)
 		w.WriteHeader(http.StatusOK)
 	})
 }
