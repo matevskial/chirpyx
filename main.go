@@ -11,17 +11,7 @@ func main() {
 
 	httpServeMux := http.NewServeMux()
 
-	/* note that if serveMux does not have any handler, the is a handler that returns 404 status code
-	I added a custom handler for 404 status code just for demonstration purposes
-	This is the way I found to make server return index.html for / and 404 for any other paths.
-	*/
-	httpServeMux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		if req.URL.Path == "/" {
-			httpFileServer.ServeHTTP(w, req)
-			return
-		}
-		http.NotFound(w, req)
-	})
+	httpServeMux.Handle("/", httpFileServer)
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
