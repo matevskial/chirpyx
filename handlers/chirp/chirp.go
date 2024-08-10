@@ -1,4 +1,4 @@
-package chirpyx
+package chirp
 
 import (
 	"encoding/json"

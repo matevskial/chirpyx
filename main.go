@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/matevskial/chirpyx/chirpyx"
+	"github.com/matevskial/chirpyx/handlers/chirp"
 	"log"
 	"net/http"
 )
@@ -22,7 +22,7 @@ func main() {
 	httpServeMux.Handle("GET /api/metrics", httpFileServerMetrics.metricsHandler())
 	httpServeMux.Handle("GET /api/reset", httpFileServerMetrics.resetHandler())
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
-	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpyx.Handler()))
+	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirp.Handler()))
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
