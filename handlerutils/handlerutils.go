@@ -16,9 +16,13 @@ func encodeResponse(payload interface{}) ([]byte, error) {
 }
 
 func respond(w http.ResponseWriter, contentType string, statusCode int, content string) {
+	respondBytes(w, contentType, statusCode, []byte(content))
+}
+
+func respondBytes(w http.ResponseWriter, contentType string, statusCode int, content []byte) {
 	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(statusCode)
-	_, err := w.Write([]byte(content))
+	_, err := w.Write(content)
 	if err != nil {
 		http.Error(w, "Internal server error", 500)
 	}
@@ -32,8 +36,7 @@ func RespondWithJson(w http.ResponseWriter, statusCode int, payload interface{})
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	w.Write(response)
+	respondBytes(w, "application/json", statusCode, response)
 }
 
 func RespondWithText(w http.ResponseWriter, statusCode int, text string) {
