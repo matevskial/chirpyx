@@ -40,6 +40,20 @@ func (a *apiMetrics) metricsHandler() http.Handler {
 	})
 }
 
+func (a *apiMetrics) metricsAdminHandler() http.Handler {
+	template := `<html>
+<body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited %d times!</p>
+</body>
+</html>
+`
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "text/html")
+		w.Write([]byte(fmt.Sprintf(template, a.hits.Load())))
+	})
+}
+
 func (a *apiMetrics) resetHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		a.hits.Store(0)
@@ -62,6 +76,7 @@ func main() {
 	httpServeMux.Handle("GET /api/healthz", healthHandler{})
 	httpServeMux.Handle("GET /api/metrics", httpFileServerMetrics.metricsHandler())
 	httpServeMux.Handle("GET /api/reset", httpFileServerMetrics.resetHandler())
+	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
