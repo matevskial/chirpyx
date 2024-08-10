@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
 	"sync/atomic"
 )
@@ -19,7 +20,7 @@ func (a *apiMetrics) meteredHandler(next http.Handler) http.Handler {
 
 func (a *apiMetrics) metricsHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(fmt.Sprintf("Hits: %v", a.hits.Load())))
+		handlerutils.RespondWithText(w, http.StatusOK, fmt.Sprintf("Hits: %v", a.hits.Load()))
 	})
 }
 
@@ -32,8 +33,7 @@ func (a *apiMetrics) metricsAdminHandler() http.Handler {
 </html>
 `
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Add("Content-Type", "text/html")
-		w.Write([]byte(fmt.Sprintf(template, a.hits.Load())))
+		handlerutils.RespondWithHtml(w, http.StatusOK, fmt.Sprintf(template, a.hits.Load()))
 	})
 }
 
