@@ -1,71 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
-	"sync/atomic"
 )
-
-type healthHandler struct{}
-
-func (healthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	responseString := "OK"
-	headers := w.Header()
-	headers.Add("Content-Type", "text/plain; charset=utf-8")
-	/* note that the line below is not really needed if w.Write is called, since 200 would be assumed
-	This is used for setting custom status codes
-	*/
-	w.WriteHeader(http.StatusOK)
-	_, err := w.Write([]byte(responseString))
-	if err != nil {
-		http.Error(w, "Internal server error", 500)
-	}
-}
-
-type apiMetrics struct {
-	hits atomic.Uint64
-}
-
-func (a *apiMetrics) middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		a.hits.Add(1)
-		next.ServeHTTP(w, req)
-	})
-}
-
-func (a *apiMetrics) metricsHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Write([]byte(fmt.Sprintf("Hits: %v", a.hits.Load())))
-	})
-}
-
-func (a *apiMetrics) metricsAdminHandler() http.Handler {
-	template := `<html>
-<body>
-    <h1>Welcome, Chirpy Admin</h1>
-    <p>Chirpy has been visited %d times!</p>
-</body>
-</html>
-`
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		w.Header().Add("Content-Type", "text/html")
-		w.Write([]byte(fmt.Sprintf(template, a.hits.Load())))
-	})
-}
-
-func (a *apiMetrics) resetHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		a.hits.Store(0)
-		w.WriteHeader(http.StatusOK)
-	})
-}
 
 func main() {
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
 	httpFileServerMetrics := apiMetrics{}
-	meteredHttpFileServer := httpFileServerMetrics.middleware(http.FileServer(staticContentDir))
+	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
 	httpServeMux := http.NewServeMux()
 
