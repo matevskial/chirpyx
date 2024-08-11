@@ -37,8 +37,6 @@ func NewDB(path string) (*JsonFileDB, error) {
 }
 
 func (db *JsonFileDB) CreateChirp(body string) (chirp.Chirp, error) {
-	db.mux.Lock()
-	defer db.mux.Unlock()
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return chirp.Chirp{}, err
@@ -53,8 +51,6 @@ func (db *JsonFileDB) CreateChirp(body string) (chirp.Chirp, error) {
 }
 
 func (db *JsonFileDB) GetChirps() ([]chirp.Chirp, error) {
-	db.mux.RLock()
-	defer db.mux.RUnlock()
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return nil, err
@@ -81,6 +77,8 @@ func (db *JsonFileDB) ensureDB() error {
 }
 
 func (db *JsonFileDB) loadDB() (DBStructure, error) {
+	db.mux.RLock()
+	defer db.mux.RUnlock()
 	data, err := os.ReadFile(db.path)
 	if err != nil {
 		return DBStructure{}, err
@@ -95,6 +93,8 @@ func (db *JsonFileDB) loadDB() (DBStructure, error) {
 }
 
 func (db *JsonFileDB) writeDB(dbStructure DBStructure) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
 	data, err := json.Marshal(dbStructure)
 	if err != nil {
 		return err
