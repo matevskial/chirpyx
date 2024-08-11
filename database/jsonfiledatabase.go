@@ -28,12 +28,12 @@ func (s *DBStructure) addChirp(chrp chirp.Chirp) {
 }
 
 func NewDB(path string) (*JsonFileDB, error) {
-	db := JsonFileDB{path: path, mux: &sync.RWMutex{}}
+	db := &JsonFileDB{path: path, mux: &sync.RWMutex{}}
 	err := db.ensureDB()
 	if err != nil {
 		return nil, err
 	}
-	return &db, nil
+	return db, nil
 }
 
 func (db *JsonFileDB) CreateChirp(body string) (chirp.Chirp, error) {
@@ -81,10 +81,6 @@ func (db *JsonFileDB) ensureDB() error {
 }
 
 func (db *JsonFileDB) loadDB() (DBStructure, error) {
-	if err := db.ensureDB(); err != nil {
-		return DBStructure{}, err
-	}
-
 	data, err := os.ReadFile(db.path)
 	if err != nil {
 		return DBStructure{}, err
@@ -99,10 +95,6 @@ func (db *JsonFileDB) loadDB() (DBStructure, error) {
 }
 
 func (db *JsonFileDB) writeDB(dbStructure DBStructure) error {
-	if err := db.ensureDB(); err != nil {
-		return err
-	}
-
 	data, err := json.Marshal(dbStructure)
 	if err != nil {
 		return err
