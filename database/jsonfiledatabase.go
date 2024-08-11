@@ -67,11 +67,7 @@ func (db *JsonFileDB) GetChirps() ([]chirp.Chirp, error) {
 
 func (db *JsonFileDB) ensureDB() error {
 	if _, err := os.Stat(db.path); errors.Is(err, os.ErrNotExist) {
-		data, jsonErr := json.Marshal(newDbStructure())
-		if jsonErr != nil {
-			return jsonErr
-		}
-		return os.WriteFile(db.path, data, 0666)
+		return db.writeDB(newDbStructure())
 	}
 	return nil
 }
@@ -95,14 +91,11 @@ func (db *JsonFileDB) loadDB() (DBStructure, error) {
 func (db *JsonFileDB) writeDB(dbStructure DBStructure) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
+
 	data, err := json.Marshal(dbStructure)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(db.path, data, 0666)
-	if err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(db.path, data, 0666)
 }
