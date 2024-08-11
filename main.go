@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/matevskial/chirpyx/database"
-	"github.com/matevskial/chirpyx/handlers"
-	"github.com/matevskial/chirpyx/repository/chirp"
+	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
+	chirpRepository "github.com/matevskial/chirpyx/repository/chirp"
 	"log"
 	"net/http"
 )
@@ -19,8 +19,8 @@ func main() {
 	httpFileServerMetrics := apiMetrics{}
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
-	chirpRepository := chirp.NewChirpJsonFileRepository(db)
-	chirpHandler := handlers.NewChirpHandler(chirpRepository)
+	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
+	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo)
 
 	httpServeMux := http.NewServeMux()
 
@@ -32,7 +32,7 @@ func main() {
 	httpServeMux.Handle("GET /api/metrics", httpFileServerMetrics.metricsHandler())
 	httpServeMux.Handle("GET /api/reset", httpFileServerMetrics.resetHandler())
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
-	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHandler.Handler()))
+	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHndlr.Handler()))
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
