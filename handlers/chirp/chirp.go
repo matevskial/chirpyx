@@ -2,22 +2,25 @@ package chirp
 
 import (
 	"encoding/json"
+	"github.com/matevskial/chirpyx/domain/chirp"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"io"
 	"net/http"
 	"strings"
 )
 
-type validateChirpRequest struct {
+type chirpCreateRequest struct {
 	Body string `json:"body"`
 }
 
-type validateChirpResponse struct {
-	Valid       bool   `json:"valid"`
-	CleanedBody string `json:"cleaned_body"`
+type chirpDto struct {
+	Id   int    `json:"id"`
+	Body string `json:"body"`
 }
 
-func cleanBody(chirpRequest *validateChirpRequest) string {
+type chirpCreateResponse = chirpDto
+
+func cleanBody(chirpRequest *chirpCreateRequest) string {
 	parts := strings.Split(chirpRequest.Body, " ")
 	for i := 0; i < len(parts); i++ {
 		if isProfaneWord(parts[i]) {
@@ -32,38 +35,56 @@ func isProfaneWord(s string) bool {
 	return lowerCaseStr == "kerfuffle" || lowerCaseStr == "sharbert" || lowerCaseStr == "fornax"
 }
 
-func Handler() http.Handler {
+func Handler(chirpRepository chirp.ChirpRepository) http.Handler {
 	httpServeMux := http.NewServeMux()
-	httpServeMux.HandleFunc("POST /validate_chirp", func(w http.ResponseWriter, req *http.Request) {
-		validateChirpRequest, err := decodeValidateChirpRequest(req.Body)
+	httpServeMux.HandleFunc("POST /chirps", func(w http.ResponseWriter, req *http.Request) {
+		chirpCreateRequest, err := decodeChirpCreateRequest(req.Body)
 		if err != nil {
 			handlerutils.RespondWithError(w, http.StatusBadRequest, "Couldn't decode body")
 			return
 		}
 
-		switch isValidChirp(validateChirpRequest) {
+		switch isValidChirp(chirpCreateRequest) {
 		case true:
-			cleanedBody := cleanBody(validateChirpRequest)
-			responseDto := validateChirpResponse{Valid: true, CleanedBody: cleanedBody}
-			handlerutils.RespondWithJson(w, http.StatusOK, responseDto)
+			cleanedBody := cleanBody(chirpCreateRequest)
+			createdChirp, err := chirpRepository.Create(cleanedBody)
+			if err != nil {
+				handlerutils.RespondWithInternalServerError(w)
+				return
+			}
+			responseDto := chirpCreateResponse{Id: createdChirp.Id, Body: createdChirp.Body}
+			handlerutils.RespondWithJson(w, http.StatusCreated, responseDto)
 		case false:
 			handlerutils.RespondWithError(w, http.StatusBadRequest, "Chirp is too long")
 		}
 	})
 
+	httpServeMux.HandleFunc("GET /chirps", func(w http.ResponseWriter, req *http.Request) {
+		chirps, err := chirpRepository.FindAll()
+		if err != nil {
+			handlerutils.RespondWithInternalServerError(w)
+			return
+		}
+		chirpDtos := make([]chirpDto, len(chirps))
+		for i, value := range chirps {
+			chirpDtos[i] = chirpDto{Id: value.Id, Body: value.Body}
+		}
+		handlerutils.RespondWithJson(w, http.StatusOK, chirpDtos)
+	})
+
 	return httpServeMux
 }
 
-func isValidChirp(request *validateChirpRequest) bool {
+func isValidChirp(request *chirpCreateRequest) bool {
 	return len(request.Body) <= 140
 }
 
-func decodeValidateChirpRequest(body io.ReadCloser) (*validateChirpRequest, error) {
+func decodeChirpCreateRequest(body io.ReadCloser) (*chirpCreateRequest, error) {
 	decoder := json.NewDecoder(body)
-	validateChirpRequest := validateChirpRequest{}
-	err := decoder.Decode(&validateChirpRequest)
+	chirpCreateRequest := chirpCreateRequest{}
+	err := decoder.Decode(&chirpCreateRequest)
 	if err != nil {
 		return nil, err
 	}
-	return &validateChirpRequest, nil
+	return &chirpCreateRequest, nil
 }

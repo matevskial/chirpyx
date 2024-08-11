@@ -51,3 +51,7 @@ func RespondWithError(w http.ResponseWriter, statusCode int, errorMessage string
 	errorResponseDto := errorResponse{Error: errorMessage}
 	RespondWithJson(w, statusCode, errorResponseDto)
 }
+
+func RespondWithInternalServerError(w http.ResponseWriter) {
+	RespondWithError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+}
