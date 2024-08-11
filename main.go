@@ -25,7 +25,7 @@ func main() {
 	httpServeMux := http.NewServeMux()
 
 	/*
-		[METHOD ][HOST]/[PATH] is the correct format of the path stribg
+		[METHOD ][HOST]/[PATH] is the correct format of the path string
 	*/
 	httpServeMux.Handle(httpFileServerPrefix+"*", http.StripPrefix(httpFileServerPrefix, meteredHttpFileServer))
 	httpServeMux.Handle("GET /api/healthz", healthHandler{})
