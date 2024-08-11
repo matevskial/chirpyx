@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/matevskial/chirpyx/database"
-	"github.com/matevskial/chirpyx/handlers/chirp"
-	chirp2 "github.com/matevskial/chirpyx/repository/chirp"
+	"github.com/matevskial/chirpyx/handlers"
+	"github.com/matevskial/chirpyx/repository/chirp"
 	"log"
 	"net/http"
 )
@@ -14,12 +14,13 @@ func main() {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}
 
-	chirpRepository := chirp2.NewChirpJsonFileRepository(db)
-
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
 	httpFileServerMetrics := apiMetrics{}
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
+
+	chirpRepository := chirp.NewChirpJsonFileRepository(db)
+	chirpHandler := handlers.NewChirpHandler(chirpRepository)
 
 	httpServeMux := http.NewServeMux()
 
@@ -31,7 +32,7 @@ func main() {
 	httpServeMux.Handle("GET /api/metrics", httpFileServerMetrics.metricsHandler())
 	httpServeMux.Handle("GET /api/reset", httpFileServerMetrics.resetHandler())
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
-	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirp.Handler(chirpRepository)))
+	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHandler.Handler()))
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
