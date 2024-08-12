@@ -17,6 +17,7 @@ func (chirpHandler *ChirpHandler) Handler() http.Handler {
 	httpServeMux := http.NewServeMux()
 	httpServeMux.HandleFunc("POST /chirps", chirpHandler.handleCreateChirp)
 	httpServeMux.HandleFunc("GET /chirps", chirpHandler.handleGetChirps)
+	httpServeMux.HandleFunc("GET /chirps/{id}", chirpHandler.getChirpById)
 	return httpServeMux
 }
 

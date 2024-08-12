@@ -20,3 +20,18 @@ func (r *ChirpJsonFileRepository) Create(body string) (chirp.Chirp, error) {
 func (r *ChirpJsonFileRepository) FindAll() ([]chirp.Chirp, error) {
 	return r.db.GetChirps()
 }
+
+func (r *ChirpJsonFileRepository) FindById(id int) (chirp.Chirp, error) {
+	chirps, err := r.db.GetChirps()
+	if err != nil {
+		return chirp.Chirp{}, err
+	}
+
+	for _, value := range chirps {
+		if value.Id == id {
+			return value, nil
+		}
+	}
+
+	return chirp.Chirp{}, chirp.ErrChirpNotFound
+}
