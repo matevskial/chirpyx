@@ -3,7 +3,7 @@ package database
 import (
 	"encoding/json"
 	"errors"
-	"github.com/matevskial/chirpyx/domain/chirp"
+	chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"os"
 	"sync"
@@ -15,23 +15,23 @@ type JsonFileDB struct {
 }
 
 type DBStructure struct {
-	Chirps    map[int]chirp.Chirp     `json:"chirps"`
-	Users     map[int]userDomain.User `json:"users"`
-	IdSeq     int                     `json:"idSeq"`
-	UserIdSeq int                     `json:"userIdSeq"`
+	Chirps    map[int]chirpDomain.Chirp `json:"chirps"`
+	Users     map[int]userDomain.User   `json:"users"`
+	IdSeq     int                       `json:"idSeq"`
+	UserIdSeq int                       `json:"userIdSeq"`
 }
 
 func newDbStructure() DBStructure {
 	return DBStructure{
-		Chirps:    make(map[int]chirp.Chirp),
+		Chirps:    make(map[int]chirpDomain.Chirp),
 		Users:     make(map[int]userDomain.User),
 		IdSeq:     1,
 		UserIdSeq: 1,
 	}
 }
 
-func (s *DBStructure) addChirp(chrp chirp.Chirp) {
-	s.Chirps[chrp.Id] = chrp
+func (s *DBStructure) addChirp(chirp chirpDomain.Chirp) {
+	s.Chirps[chirp.Id] = chirp
 	s.IdSeq++
 }
 
@@ -49,27 +49,27 @@ func NewDB(path string) (*JsonFileDB, error) {
 	return db, nil
 }
 
-func (db *JsonFileDB) CreateChirp(body string) (chirp.Chirp, error) {
+func (db *JsonFileDB) CreateChirp(body string) (chirpDomain.Chirp, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
-		return chirp.Chirp{}, err
+		return chirpDomain.Chirp{}, err
 	}
-	chrp := chirp.Chirp{Id: dbStructure.IdSeq, Body: body}
-	dbStructure.addChirp(chrp)
+	chirp := chirpDomain.Chirp{Id: dbStructure.IdSeq, Body: body}
+	dbStructure.addChirp(chirp)
 	err = db.writeDB(dbStructure)
 	if err != nil {
-		return chirp.Chirp{}, err
+		return chirpDomain.Chirp{}, err
 	}
-	return chrp, nil
+	return chirp, nil
 }
 
-func (db *JsonFileDB) GetChirps() ([]chirp.Chirp, error) {
+func (db *JsonFileDB) GetChirps() ([]chirpDomain.Chirp, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return nil, err
 	}
 
-	chirps := make([]chirp.Chirp, len(dbStructure.Chirps))
+	chirps := make([]chirpDomain.Chirp, len(dbStructure.Chirps))
 	i := 0
 	for _, value := range dbStructure.Chirps {
 		chirps[i] = value
