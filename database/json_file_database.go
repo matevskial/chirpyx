@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/matevskial/chirpyx/domain/chirp"
+	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"os"
 	"sync"
 )
@@ -14,17 +15,29 @@ type JsonFileDB struct {
 }
 
 type DBStructure struct {
-	Chirps map[int]chirp.Chirp `json:"chirps"`
-	IdSeq  int                 `json:"idSeq"`
+	Chirps    map[int]chirp.Chirp     `json:"chirps"`
+	Users     map[int]userDomain.User `json:"users"`
+	IdSeq     int                     `json:"idSeq"`
+	UserIdSeq int                     `json:"userIdSeq"`
 }
 
 func newDbStructure() DBStructure {
-	return DBStructure{Chirps: make(map[int]chirp.Chirp), IdSeq: 1}
+	return DBStructure{
+		Chirps:    make(map[int]chirp.Chirp),
+		Users:     make(map[int]userDomain.User),
+		IdSeq:     1,
+		UserIdSeq: 1,
+	}
 }
 
 func (s *DBStructure) addChirp(chrp chirp.Chirp) {
 	s.Chirps[chrp.Id] = chrp
 	s.IdSeq++
+}
+
+func (s *DBStructure) addUser(user userDomain.User) {
+	s.Users[user.Id] = user
+	s.UserIdSeq++
 }
 
 func NewDB(path string) (*JsonFileDB, error) {
@@ -63,6 +76,20 @@ func (db *JsonFileDB) GetChirps() ([]chirp.Chirp, error) {
 		i++
 	}
 	return chirps, nil
+}
+
+func (db *JsonFileDB) CreateUser(email string) (userDomain.User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return userDomain.User{}, err
+	}
+	user := userDomain.User{Id: dbStructure.UserIdSeq, Email: email}
+	dbStructure.addUser(user)
+	err = db.writeDB(dbStructure)
+	if err != nil {
+		return userDomain.User{}, err
+	}
+	return user, nil
 }
 
 func (db *JsonFileDB) ensureDB() error {
