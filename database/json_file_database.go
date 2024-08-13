@@ -15,24 +15,24 @@ type JsonFileDB struct {
 }
 
 type DBStructure struct {
-	Chirps    map[int]chirpDomain.Chirp `json:"chirps"`
-	Users     map[int]userDomain.User   `json:"users"`
-	IdSeq     int                       `json:"idSeq"`
-	UserIdSeq int                       `json:"userIdSeq"`
+	Chirps     map[int]chirpDomain.Chirp `json:"chirps"`
+	Users      map[int]userDomain.User   `json:"users"`
+	ChirpIdSeq int                       `json:"idSeq"`
+	UserIdSeq  int                       `json:"userIdSeq"`
 }
 
 func newDbStructure() DBStructure {
 	return DBStructure{
-		Chirps:    make(map[int]chirpDomain.Chirp),
-		Users:     make(map[int]userDomain.User),
-		IdSeq:     1,
-		UserIdSeq: 1,
+		Chirps:     make(map[int]chirpDomain.Chirp),
+		Users:      make(map[int]userDomain.User),
+		ChirpIdSeq: 1,
+		UserIdSeq:  1,
 	}
 }
 
 func (s *DBStructure) addChirp(chirp chirpDomain.Chirp) {
 	s.Chirps[chirp.Id] = chirp
-	s.IdSeq++
+	s.ChirpIdSeq++
 }
 
 func (s *DBStructure) addUser(user userDomain.User) {
@@ -54,7 +54,7 @@ func (db *JsonFileDB) CreateChirp(body string) (chirpDomain.Chirp, error) {
 	if err != nil {
 		return chirpDomain.Chirp{}, err
 	}
-	chirp := chirpDomain.Chirp{Id: dbStructure.IdSeq, Body: body}
+	chirp := chirpDomain.Chirp{Id: dbStructure.ChirpIdSeq, Body: body}
 	dbStructure.addChirp(chirp)
 	err = db.writeDB(dbStructure)
 	if err != nil {
