@@ -3,7 +3,6 @@ package chirp
 import (
 	"encoding/json"
 	"github.com/matevskial/chirpyx/handlerutils"
-	"io"
 	"net/http"
 	"strings"
 )
@@ -15,7 +14,9 @@ type chirpCreateRequest struct {
 type chirpCreateResponse = chirpDto
 
 func (chirpHandler *ChirpHandler) handleCreateChirp(w http.ResponseWriter, req *http.Request) {
-	chirpCreateRequest, err := decodeChirpCreateRequest(req.Body)
+	chirpCreateRequest := chirpCreateRequest{}
+	decoder := json.NewDecoder(req.Body)
+	err := decoder.Decode(&chirpCreateRequest)
 	if err != nil {
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "Couldn't decode body")
 		return
@@ -36,21 +37,11 @@ func (chirpHandler *ChirpHandler) handleCreateChirp(w http.ResponseWriter, req *
 	}
 }
 
-func decodeChirpCreateRequest(body io.ReadCloser) (*chirpCreateRequest, error) {
-	decoder := json.NewDecoder(body)
-	chirpCreateRequest := chirpCreateRequest{}
-	err := decoder.Decode(&chirpCreateRequest)
-	if err != nil {
-		return nil, err
-	}
-	return &chirpCreateRequest, nil
-}
-
-func isValidChirp(request *chirpCreateRequest) bool {
+func isValidChirp(request chirpCreateRequest) bool {
 	return len(request.Body) <= 140
 }
 
-func cleanBody(chirpRequest *chirpCreateRequest) string {
+func cleanBody(chirpRequest chirpCreateRequest) string {
 	parts := strings.Split(chirpRequest.Body, " ")
 	for i := 0; i < len(parts); i++ {
 		if isProfaneWord(parts[i]) {
