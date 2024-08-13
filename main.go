@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"github.com/matevskial/chirpyx/database"
 	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
 	userHandler "github.com/matevskial/chirpyx/handlers/user"
@@ -11,7 +12,10 @@ import (
 )
 
 func main() {
-	db, dbErr := database.NewDB("database.json")
+	isDevMode := flag.Bool("dev", false, "Enable dev mode")
+	flag.Parse()
+
+	db, dbErr := database.NewDB("database.json", *isDevMode)
 	if dbErr != nil {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}

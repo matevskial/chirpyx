@@ -40,9 +40,9 @@ func (s *DBStructure) addUser(user userDomain.User) {
 	s.UserIdSeq++
 }
 
-func NewDB(path string) (*JsonFileDB, error) {
+func NewDB(path string, shouldTruncateExistingFile bool) (*JsonFileDB, error) {
 	db := &JsonFileDB{path: path, mux: &sync.RWMutex{}}
-	err := db.ensureDB()
+	err := db.ensureDB(shouldTruncateExistingFile)
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (db *JsonFileDB) CreateUser(email string) (userDomain.User, error) {
 	return user, nil
 }
 
-func (db *JsonFileDB) ensureDB() error {
-	if _, err := os.Stat(db.path); errors.Is(err, os.ErrNotExist) {
+func (db *JsonFileDB) ensureDB(shouldTruncateExistingFile bool) error {
+	if _, err := os.Stat(db.path); shouldTruncateExistingFile || errors.Is(err, os.ErrNotExist) {
 		return db.writeDB(newDbStructure())
 	}
 	return nil
