@@ -13,7 +13,7 @@ func NewUserJsonFileRepository(db *database.JsonFileDB) *UserJsonFileRepository 
 	return &UserJsonFileRepository{db: db}
 }
 
-func (r *UserJsonFileRepository) Create(email string, hashedPassword string) (userDomain.User, error) {
+func (r *UserJsonFileRepository) Create(email, hashedPassword string) (userDomain.User, error) {
 	return r.db.CreateUser(email, hashedPassword)
 }
 
@@ -27,4 +27,12 @@ func (r *UserJsonFileRepository) GetUserWithPasswordByEmail(email string) (userD
 		return userDomain.UserWithPassword{}, err
 	}
 	return userDomain.UserWithPassword{Id: user.Id, Email: user.Email, HashedPassword: user.HashedPassword}, nil
+}
+
+func (r *UserJsonFileRepository) ExistsByEmailAndIdIsNot(email string, id int) (bool, error) {
+	return r.db.ExistsUserByEmailAndIdIsNot(email, id)
+}
+
+func (r *UserJsonFileRepository) Update(id int, email, hashedPassword string) (userDomain.User, error) {
+	return r.db.UpdateUser(id, email, hashedPassword)
 }

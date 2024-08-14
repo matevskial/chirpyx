@@ -47,6 +47,17 @@ func (s *DBStructure) addUser(user User) userDomain.User {
 	return userDomain.User{Id: user.Id, Email: user.Email}
 }
 
+func (s *DBStructure) updateUser(id int, email string, hashedPassword string) (userDomain.User, error) {
+	user, exists := s.Users[id]
+	if !exists {
+		return userDomain.User{}, userDomain.ErrUserNotFound
+	}
+	user.Email = email
+	user.HashedPassword = hashedPassword
+	s.Users[id] = user
+	return userDomain.User{Id: user.Id, Email: user.Email}, nil
+}
+
 func NewDB(path string, shouldTruncateExistingFile bool) (*JsonFileDB, error) {
 	db := &JsonFileDB{path: path, mux: &sync.RWMutex{}}
 	err := db.ensureDB(shouldTruncateExistingFile)
@@ -127,6 +138,38 @@ func (db *JsonFileDB) GetUserByEmail(email string) (User, error) {
 	}
 
 	return User{}, userDomain.ErrUserNotFound
+}
+
+func (db *JsonFileDB) ExistsUserByEmailAndIdIsNot(email string, id int) (bool, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return false, err
+	}
+
+	for _, value := range dbStructure.Users {
+		if value.Email == email && value.Id != id {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (db *JsonFileDB) UpdateUser(id int, email string, hashedPassword string) (userDomain.User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return userDomain.User{}, err
+	}
+
+	user, err := dbStructure.updateUser(id, email, hashedPassword)
+	if err != nil {
+		return userDomain.User{}, err
+	}
+	err = db.writeDB(dbStructure)
+	if err != nil {
+		return userDomain.User{}, err
+	}
+	return user, nil
 }
 
 func (db *JsonFileDB) ensureDB(shouldTruncateExistingFile bool) error {

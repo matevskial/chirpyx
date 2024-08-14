@@ -24,18 +24,21 @@ func main() {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}
 
+	jwtService := authutils.NewJwtService(config)
+
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
 	httpFileServerMetrics := apiMetrics{}
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
+	authenticationMiddleware := authentication.NewAuthenticationMiddleware(jwtService)
+
 	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
 	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo)
 
 	userRepo := userRepository.NewUserJsonFileRepository(db)
-	userHndlr := userHandler.NewUserHandler("/api/users", userRepo)
+	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)
 
-	jwtService := authutils.NewJwtService(config)
 	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo, jwtService)
 
 	httpServeMux := http.NewServeMux()

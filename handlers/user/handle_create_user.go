@@ -7,19 +7,9 @@ import (
 	"net/http"
 )
 
-type userCreateRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-type userCreateResponse struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-}
-
 func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	userCreateRequest := userCreateRequest{}
+	userCreateRequest := userCreateUpdateRequest{}
 	err := decoder.Decode(&userCreateRequest)
 	if err != nil {
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "Couldn't decode body")
@@ -33,6 +23,7 @@ func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *htt
 	}
 	if userExists {
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "User with provided email already exists")
+		return
 	}
 
 	hashedPassword, err := authutils.HashPassword(userCreateRequest.Password)
@@ -47,6 +38,6 @@ func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	userCreateResponse := userCreateResponse{Id: user.Id, Email: user.Email}
+	userCreateResponse := userCreateUpdateResponse{Id: user.Id, Email: user.Email}
 	handlerutils.RespondWithJson(w, http.StatusCreated, userCreateResponse)
 }

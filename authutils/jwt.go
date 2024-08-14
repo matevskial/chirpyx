@@ -37,6 +37,12 @@ func (jwtService *JwtService) GenerateJwtFor(generateRequest JwtGenerateRequest)
 	return token.SignedString([]byte(jwtService.config.JwtSecret))
 }
 
+func (jwtService *JwtService) ParseToken(tokenString string) (*jwt.Token, error) {
+	return jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtService.config.JwtSecret), nil
+	})
+}
+
 func getExpiresAfter(seconds int) time.Duration {
 	if seconds == 0 {
 		return defaultExpiresAfter

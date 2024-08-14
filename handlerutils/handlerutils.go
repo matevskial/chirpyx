@@ -55,3 +55,7 @@ func RespondWithError(w http.ResponseWriter, statusCode int, errorMessage string
 func RespondWithInternalServerError(w http.ResponseWriter) {
 	RespondWithError(w, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 }
+
+func RespondWithUnauthorized(w http.ResponseWriter) {
+	RespondWithError(w, http.StatusUnauthorized, "unauthorized")
+}
