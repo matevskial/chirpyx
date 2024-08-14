@@ -9,9 +9,12 @@ import (
 	"strings"
 )
 
+const defaultIssuer = "chirpy"
+
 type Configuration struct {
 	IsDevMode bool
 	JwtSecret string
+	JwtIssuer string
 }
 
 func Parse() (*Configuration, error) {
@@ -38,6 +41,13 @@ func Parse() (*Configuration, error) {
 		return nil, jwtSecretErr
 	}
 	config.JwtSecret = jwtSecret
+
+	jwtIssuerFromEnv := os.Getenv("JWT_ISSUER")
+	if len(strings.TrimSpace(jwtIssuerFromEnv)) == 0 {
+		config.JwtIssuer = defaultIssuer
+	} else {
+		config.JwtIssuer = jwtIssuerFromEnv
+	}
 
 	return &config, nil
 }

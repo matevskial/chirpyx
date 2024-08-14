@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/matevskial/chirpyx/authutils"
 	"github.com/matevskial/chirpyx/configuration"
 	"github.com/matevskial/chirpyx/database"
 	"github.com/matevskial/chirpyx/handlers/authentication"
@@ -34,7 +35,8 @@ func main() {
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo)
 
-	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo)
+	jwtService := authutils.NewJwtService(config)
+	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo, jwtService)
 
 	httpServeMux := http.NewServeMux()
 

@@ -10,8 +10,9 @@ import (
 )
 
 type userLoginRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	ExpiresInSeconds int    `json:"expires_in_seconds"`
 }
 
 func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.ResponseWriter, req *http.Request) {
@@ -38,9 +39,17 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 		return
 	}
 
+	token, err := authenticationHandler.jwtService.GenerateJwtFor(authutils.JwtGenerateRequest{UserId: user.Id, ExpiresInSeconds: userLoginRequest.ExpiresInSeconds})
+
+	if err != nil {
+		handlerutils.RespondWithInternalServerError(w)
+		return
+	}
+
 	loggedUser := loggedUserResponseDto{
 		Id:    user.Id,
 		Email: user.Email,
+		Token: token,
 	}
 	handlerutils.RespondWithJson(w, http.StatusOK, loggedUser)
 }
