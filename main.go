@@ -53,7 +53,7 @@ func main() {
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
 	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHndlr.Handler()))
 	httpServeMux.Handle(userHndlr.Path, userHndlr.Handler())
-	httpServeMux.Handle(authenticationHndlr.Path, authenticationHndlr.Handler())
+	httpServeMux.Handle("/api/login", authenticationHndlr.LoginHandler())
 
 	httpServer := http.Server{
 		Handler: httpServeMux,

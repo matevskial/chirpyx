@@ -22,8 +22,6 @@ func NewAuthenticationHandler(path string, userRepository userDomain.UserReposit
 	return &AuthenticationHandler{Path: path, userRepository: userRepository, jwtService: jwtService}
 }
 
-func (authenticationHandler *AuthenticationHandler) Handler() http.Handler {
-	httpServeMux := http.NewServeMux()
-	httpServeMux.HandleFunc("POST"+" "+authenticationHandler.Path, authenticationHandler.handleUserLogin)
-	return httpServeMux
+func (authenticationHandler *AuthenticationHandler) LoginHandler() http.Handler {
+	return http.HandlerFunc(authenticationHandler.handleUserLogin)
 }
