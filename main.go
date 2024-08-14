@@ -1,7 +1,7 @@
 package main
 
 import (
-	"flag"
+	"github.com/matevskial/chirpyx/configuration"
 	"github.com/matevskial/chirpyx/database"
 	"github.com/matevskial/chirpyx/handlers/authentication"
 	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
@@ -13,10 +13,12 @@ import (
 )
 
 func main() {
-	isDevMode := flag.Bool("dev", false, "Enable dev mode")
-	flag.Parse()
+	config, configErr := configuration.Parse()
+	if configErr != nil {
+		log.Fatalf("Error initializing configuration: %v", configErr)
+	}
 
-	db, dbErr := database.NewDB("database.json", *isDevMode)
+	db, dbErr := database.NewDB("database.json", config.IsDevMode)
 	if dbErr != nil {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}
