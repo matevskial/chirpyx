@@ -2,17 +2,17 @@ package authentication
 
 import (
 	"errors"
-	"github.com/matevskial/chirpyx/authutils"
+	"github.com/matevskial/chirpyx/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
 	"strings"
 )
 
 type AuthenticationMiddleware struct {
-	jwtService *authutils.JwtService
+	jwtService *auth.JwtService
 }
 
-func NewAuthenticationMiddleware(jwtService *authutils.JwtService) *AuthenticationMiddleware {
+func NewAuthenticationMiddleware(jwtService *auth.JwtService) *AuthenticationMiddleware {
 	return &AuthenticationMiddleware{jwtService: jwtService}
 }
 
@@ -31,7 +31,7 @@ func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http
 		}
 
 		oldContext := req.Context()
-		newContext := authutils.NewContextWithTokenValue(oldContext, token)
+		newContext := auth.NewContextWithTokenValue(oldContext, token)
 		next.ServeHTTP(w, req.WithContext(newContext))
 	})
 }

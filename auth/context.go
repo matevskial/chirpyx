@@ -1,4 +1,4 @@
-package authutils
+package auth
 
 import (
 	"context"

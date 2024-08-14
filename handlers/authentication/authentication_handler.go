@@ -1,7 +1,7 @@
 package authentication
 
 import (
-	"github.com/matevskial/chirpyx/authutils"
+	"github.com/matevskial/chirpyx/auth"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"net/http"
 )
@@ -15,10 +15,10 @@ type loggedUserResponseDto struct {
 type AuthenticationHandler struct {
 	Path           string
 	userRepository userDomain.UserRepository
-	jwtService     *authutils.JwtService
+	jwtService     *auth.JwtService
 }
 
-func NewAuthenticationHandler(path string, userRepository userDomain.UserRepository, jwtService *authutils.JwtService) *AuthenticationHandler {
+func NewAuthenticationHandler(path string, userRepository userDomain.UserRepository, jwtService *auth.JwtService) *AuthenticationHandler {
 	return &AuthenticationHandler{Path: path, userRepository: userRepository, jwtService: jwtService}
 }
 

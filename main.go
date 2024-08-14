@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/matevskial/chirpyx/authutils"
+	"github.com/matevskial/chirpyx/auth"
 	"github.com/matevskial/chirpyx/configuration"
 	"github.com/matevskial/chirpyx/database"
 	"github.com/matevskial/chirpyx/handlers/authentication"
@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}
 
-	jwtService := authutils.NewJwtService(config)
+	jwtService := auth.NewJwtService(config)
 
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
