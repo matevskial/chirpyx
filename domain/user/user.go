@@ -14,11 +14,11 @@ type User struct {
 type UserWithPassword struct {
 	Id             int
 	Email          string
-	HashedPassword []byte
+	HashedPassword string
 }
 
 type UserRepository interface {
-	Create(email string, hashedPassword []byte) (User, error)
+	Create(email string, hashedPassword string) (User, error)
 	ExistsByEmail(email string) (bool, error)
 	GetUserWithPasswordByEmail(email string) (UserWithPassword, error)
 }

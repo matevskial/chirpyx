@@ -13,7 +13,7 @@ func NewUserJsonFileRepository(db *database.JsonFileDB) *UserJsonFileRepository 
 	return &UserJsonFileRepository{db: db}
 }
 
-func (r *UserJsonFileRepository) Create(email string, hashedPassword []byte) (userDomain.User, error) {
+func (r *UserJsonFileRepository) Create(email string, hashedPassword string) (userDomain.User, error) {
 	return r.db.CreateUser(email, hashedPassword)
 }
 

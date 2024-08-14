@@ -3,9 +3,9 @@ package authentication
 import (
 	"encoding/json"
 	"errors"
+	"github.com/matevskial/chirpyx/authutils"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"github.com/matevskial/chirpyx/handlerutils"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -32,7 +32,7 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 		return
 	}
 
-	passwordMatchError := bcrypt.CompareHashAndPassword(user.HashedPassword, []byte(userLoginRequest.Password))
+	passwordMatchError := authutils.ComparePasswordWithHash(userLoginRequest.Password, user.HashedPassword)
 	if passwordMatchError != nil {
 		handlerutils.RespondWithError(w, http.StatusUnauthorized, "User not found or password mismatch")
 		return

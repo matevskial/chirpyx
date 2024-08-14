@@ -17,7 +17,7 @@ type JsonFileDB struct {
 type User struct {
 	Id             int
 	Email          string
-	HashedPassword []byte
+	HashedPassword string
 }
 
 type DBStructure struct {
@@ -85,7 +85,7 @@ func (db *JsonFileDB) GetChirps() ([]chirpDomain.Chirp, error) {
 	return chirps, nil
 }
 
-func (db *JsonFileDB) CreateUser(email string, hashedPassword []byte) (userDomain.User, error) {
+func (db *JsonFileDB) CreateUser(email string, hashedPassword string) (userDomain.User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return userDomain.User{}, err

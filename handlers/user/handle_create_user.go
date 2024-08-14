@@ -2,8 +2,8 @@ package user
 
 import (
 	"encoding/json"
+	"github.com/matevskial/chirpyx/authutils"
 	"github.com/matevskial/chirpyx/handlerutils"
-	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
@@ -35,7 +35,7 @@ func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *htt
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "User with provided email already exists")
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userCreateRequest.Password), 1)
+	hashedPassword, err := authutils.HashPassword(userCreateRequest.Password)
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return
