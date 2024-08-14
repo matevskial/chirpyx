@@ -3,11 +3,13 @@ package user
 import (
 	"encoding/json"
 	"github.com/matevskial/chirpyx/handlerutils"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 )
 
 type userCreateRequest struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type userCreateResponse struct {
@@ -24,8 +26,22 @@ func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	user, err := userHandler.userRepository.Create(userCreateRequest.Email)
+	userExists, err := userHandler.userRepository.ExistsByEmail(userCreateRequest.Email)
+	if err != nil {
+		handlerutils.RespondWithInternalServerError(w)
+		return
+	}
+	if userExists {
+		handlerutils.RespondWithError(w, http.StatusBadRequest, "User with provided email already exists")
+	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userCreateRequest.Password), 1)
+	if err != nil {
+		handlerutils.RespondWithInternalServerError(w)
+		return
+	}
+
+	user, err := userHandler.userRepository.Create(userCreateRequest.Email, hashedPassword)
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return

@@ -14,9 +14,15 @@ type JsonFileDB struct {
 	mux  *sync.RWMutex
 }
 
+type User struct {
+	Id             int
+	Email          string
+	HashedPassword []byte
+}
+
 type DBStructure struct {
 	Chirps     map[int]chirpDomain.Chirp `json:"chirps"`
-	Users      map[int]userDomain.User   `json:"users"`
+	Users      map[int]User              `json:"users"`
 	ChirpIdSeq int                       `json:"idSeq"`
 	UserIdSeq  int                       `json:"userIdSeq"`
 }
@@ -24,7 +30,7 @@ type DBStructure struct {
 func newDbStructure() DBStructure {
 	return DBStructure{
 		Chirps:     make(map[int]chirpDomain.Chirp),
-		Users:      make(map[int]userDomain.User),
+		Users:      make(map[int]User),
 		ChirpIdSeq: 1,
 		UserIdSeq:  1,
 	}
@@ -35,9 +41,10 @@ func (s *DBStructure) addChirp(chirp chirpDomain.Chirp) {
 	s.ChirpIdSeq++
 }
 
-func (s *DBStructure) addUser(user userDomain.User) {
+func (s *DBStructure) addUser(user User) userDomain.User {
 	s.Users[user.Id] = user
 	s.UserIdSeq++
+	return userDomain.User{Id: user.Id, Email: user.Email}
 }
 
 func NewDB(path string, shouldTruncateExistingFile bool) (*JsonFileDB, error) {
@@ -78,18 +85,48 @@ func (db *JsonFileDB) GetChirps() ([]chirpDomain.Chirp, error) {
 	return chirps, nil
 }
 
-func (db *JsonFileDB) CreateUser(email string) (userDomain.User, error) {
+func (db *JsonFileDB) CreateUser(email string, hashedPassword []byte) (userDomain.User, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return userDomain.User{}, err
 	}
-	user := userDomain.User{Id: dbStructure.UserIdSeq, Email: email}
-	dbStructure.addUser(user)
+	userToAdd := User{Id: dbStructure.UserIdSeq, Email: email, HashedPassword: hashedPassword}
+	addedUser := dbStructure.addUser(userToAdd)
 	err = db.writeDB(dbStructure)
 	if err != nil {
 		return userDomain.User{}, err
 	}
-	return user, nil
+	return addedUser, nil
+}
+
+func (db *JsonFileDB) ExistsUserByEmail(email string) (bool, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return false, err
+	}
+
+	for _, value := range dbStructure.Users {
+		if value.Email == email {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func (db *JsonFileDB) GetUserByEmail(email string) (User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return User{}, err
+	}
+
+	for _, value := range dbStructure.Users {
+		if value.Email == email {
+			return value, nil
+		}
+	}
+
+	return User{}, userDomain.ErrUserNotFound
 }
 
 func (db *JsonFileDB) ensureDB(shouldTruncateExistingFile bool) error {

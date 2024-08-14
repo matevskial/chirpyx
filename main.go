@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/matevskial/chirpyx/database"
+	"github.com/matevskial/chirpyx/handlers/authentication"
 	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
 	userHandler "github.com/matevskial/chirpyx/handlers/user"
 	chirpRepository "github.com/matevskial/chirpyx/repository/chirp"
@@ -31,6 +32,8 @@ func main() {
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo)
 
+	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo)
+
 	httpServeMux := http.NewServeMux()
 
 	/*
@@ -43,6 +46,7 @@ func main() {
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
 	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHndlr.Handler()))
 	httpServeMux.Handle(userHndlr.Path, userHndlr.Handler())
+	httpServeMux.Handle(authenticationHndlr.Path, authenticationHndlr.Handler())
 
 	httpServer := http.Server{
 		Handler: httpServeMux,
