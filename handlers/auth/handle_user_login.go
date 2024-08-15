@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/matevskial/chirpyx/auth"
+	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -45,7 +46,7 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 		return
 	}
 
-	token, err := authenticationHandler.jwtService.GenerateJwtFor(auth.JwtGenerateRequest{UserId: user.Id})
+	token, err := authenticationHandler.authenticationService.GenerateToken(authDomain.GenerateTokenRequest{UserId: user.Id})
 
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)

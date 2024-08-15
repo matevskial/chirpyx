@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"github.com/matevskial/chirpyx/auth"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -28,7 +27,7 @@ func (authenticationHandler *AuthenticationHandler) handleRefreshToken(w http.Re
 		return
 	}
 
-	token, err := authenticationHandler.jwtService.GenerateJwtFor(auth.JwtGenerateRequest{UserId: refreshToken.UserId})
+	token, err := authenticationHandler.authenticationService.GenerateToken(authDomain.GenerateTokenRequest{UserId: refreshToken.UserId})
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return

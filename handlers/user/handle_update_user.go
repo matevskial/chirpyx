@@ -7,23 +7,10 @@ import (
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
-	"strconv"
 )
 
 func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *http.Request) {
-	token, ok := auth.GetTokenFromContext(req.Context())
-	if !ok {
-		handlerutils.RespondWithUnauthorized(w)
-		return
-	}
-
-	userIdStr, err := token.Claims.GetSubject()
-	if err != nil {
-		handlerutils.RespondWithUnauthorized(w)
-		return
-	}
-
-	userId, err := strconv.Atoi(userIdStr)
+	authenticationPrincipal, err := handlerutils.GetAuthenticationPrincipalFromRequest(req)
 	if err != nil {
 		handlerutils.RespondWithUnauthorized(w)
 		return
@@ -37,7 +24,7 @@ func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	otherUserWithSameEmailExists, err := userHandler.userRepository.ExistsByEmailAndIdIsNot(userUpdateRequest.Email, userId)
+	otherUserWithSameEmailExists, err := userHandler.userRepository.ExistsByEmailAndIdIsNot(userUpdateRequest.Email, authenticationPrincipal.UserId)
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return
@@ -53,7 +40,7 @@ func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	user, err := userHandler.userRepository.Update(userId, userUpdateRequest.Email, hashedPassword)
+	user, err := userHandler.userRepository.Update(authenticationPrincipal.UserId, userUpdateRequest.Email, hashedPassword)
 	if errors.Is(err, userDomain.ErrUserNotFound) {
 		handlerutils.RespondWithError(w, http.StatusNotFound, "User not found")
 		return

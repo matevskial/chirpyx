@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("Error initializing database: %v", dbErr)
 	}
 
-	jwtService := auth.NewJwtService(config)
+	authenticationService := auth.NewAuthenticationJwtService(config)
 	refreshTokenService := auth.NewRefreshTokenService(db)
 
 	staticContentDir := http.Dir(".")
@@ -33,7 +33,7 @@ func main() {
 	httpFileServerMetrics := apiMetrics{}
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
-	authenticationMiddleware := authMiddleware.NewAuthenticationMiddleware(jwtService)
+	authenticationMiddleware := authMiddleware.NewAuthenticationMiddleware(authenticationService)
 
 	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
 	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo)
@@ -41,7 +41,7 @@ func main() {
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)
 
-	authenticationHndlr := authHandler.NewAuthenticationHandler("/api/login", userRepo, jwtService, refreshTokenService)
+	authenticationHndlr := authHandler.NewAuthenticationHandler("/api/login", userRepo, authenticationService, refreshTokenService)
 
 	httpServeMux := http.NewServeMux()
 

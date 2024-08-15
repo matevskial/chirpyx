@@ -4,23 +4,22 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/matevskial/chirpyx/configuration"
-	"github.com/matevskial/chirpyx/domain/auth"
+	authDomain "github.com/matevskial/chirpyx/domain/auth"
+	"github.com/matevskial/chirpyx/handlerutils"
+	"net/http"
+	"strconv"
 	"time"
 )
 
-type JwtService struct {
+type AuthenticationJwtService struct {
 	config *configuration.Configuration
 }
 
-func NewJwtService(config *configuration.Configuration) *JwtService {
-	return &JwtService{config: config}
+func NewAuthenticationJwtService(config *configuration.Configuration) authDomain.AuthenticationService {
+	return &AuthenticationJwtService{config: config}
 }
 
-type JwtGenerateRequest struct {
-	UserId int
-}
-
-func (jwtService *JwtService) GenerateJwtFor(generateRequest JwtGenerateRequest) (string, error) {
+func (jwtService *AuthenticationJwtService) GenerateToken(generateRequest authDomain.GenerateTokenRequest) (string, error) {
 	now := time.Now().UTC()
 	expiresAfter := getExpiresAfter()
 	expiresAt := now.Add(expiresAfter)
@@ -35,12 +34,36 @@ func (jwtService *JwtService) GenerateJwtFor(generateRequest JwtGenerateRequest)
 	return token.SignedString([]byte(jwtService.config.JwtSecret))
 }
 
-func (jwtService *JwtService) ParseToken(tokenString string) (*jwt.Token, error) {
+func (jwtService *AuthenticationJwtService) Authenticate(req *http.Request) (*authDomain.AuthenticationPrincipal, error) {
+	tokenString, err := handlerutils.GetBearerTokenString(req)
+	if err != nil {
+		return nil, authDomain.ErrNotAuthenticated
+	}
+
+	token, err := jwtService.parseToken(tokenString)
+	if err != nil {
+		return nil, authDomain.ErrNotAuthenticated
+	}
+
+	userIdStr, err := token.Claims.GetSubject()
+	if err != nil {
+		return nil, authDomain.ErrNotAuthenticated
+	}
+
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		return nil, authDomain.ErrNotAuthenticated
+	}
+
+	return &authDomain.AuthenticationPrincipal{UserId: userId}, nil
+}
+
+func (jwtService *AuthenticationJwtService) parseToken(tokenString string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtService.config.JwtSecret), nil
 	})
 }
 
 func getExpiresAfter() time.Duration {
-	return auth.AccessTokenExpiresAfterInHours * time.Hour
+	return authDomain.AccessTokenExpiresAfterInHours * time.Hour
 }

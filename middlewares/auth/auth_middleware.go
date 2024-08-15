@@ -1,35 +1,28 @@
 package auth
 
 import (
-	"github.com/matevskial/chirpyx/auth"
+	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
 )
 
 type AuthenticationMiddleware struct {
-	jwtService *auth.JwtService
+	authenticationService authDomain.AuthenticationService
 }
 
-func NewAuthenticationMiddleware(jwtService *auth.JwtService) *AuthenticationMiddleware {
-	return &AuthenticationMiddleware{jwtService: jwtService}
+func NewAuthenticationMiddleware(jwtService authDomain.AuthenticationService) *AuthenticationMiddleware {
+	return &AuthenticationMiddleware{authenticationService: jwtService}
 }
 
 func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := handlerutils.GetBearerTokenString(req)
+		authenticationPrincipal, err := am.authenticationService.Authenticate(req)
 		if err != nil {
 			handlerutils.RespondWithUnauthorized(w)
 			return
 		}
 
-		token, err := am.jwtService.ParseToken(tokenString)
-		if err != nil {
-			handlerutils.RespondWithUnauthorized(w)
-			return
-		}
-
-		oldContext := req.Context()
-		newContext := auth.NewContextWithTokenValue(oldContext, token)
-		next.ServeHTTP(w, req.WithContext(newContext))
+		newReq := handlerutils.NewAuthenticatedRequest(req, authenticationPrincipal)
+		next.ServeHTTP(w, newReq)
 	})
 }

@@ -1,30 +1,29 @@
 package auth
 
 import (
-	"github.com/matevskial/chirpyx/auth"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"net/http"
 )
 
 type AuthenticationHandler struct {
-	Path                string
-	userRepository      userDomain.UserRepository
-	jwtService          *auth.JwtService
-	refreshTokenService authDomain.RefreshTokenService
+	Path                  string
+	userRepository        userDomain.UserRepository
+	authenticationService authDomain.AuthenticationService
+	refreshTokenService   authDomain.RefreshTokenService
 }
 
 func NewAuthenticationHandler(
 	path string,
 	userRepository userDomain.UserRepository,
-	jwtService *auth.JwtService,
+	authenticationService authDomain.AuthenticationService,
 	refreshTokenService authDomain.RefreshTokenService,
 ) *AuthenticationHandler {
 	return &AuthenticationHandler{
-		Path:                path,
-		userRepository:      userRepository,
-		jwtService:          jwtService,
-		refreshTokenService: refreshTokenService,
+		Path:                  path,
+		userRepository:        userRepository,
+		authenticationService: authenticationService,
+		refreshTokenService:   refreshTokenService,
 	}
 }
 
