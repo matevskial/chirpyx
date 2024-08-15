@@ -2,7 +2,7 @@ package user
 
 import (
 	userDomain "github.com/matevskial/chirpyx/domain/user"
-	"github.com/matevskial/chirpyx/handlers/auth"
+	"github.com/matevskial/chirpyx/middlewares/auth"
 	"net/http"
 )
 
