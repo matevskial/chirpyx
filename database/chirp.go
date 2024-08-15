@@ -1,6 +1,10 @@
 package database
 
-import chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
+import (
+	"github.com/matevskial/chirpyx/common"
+	chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
+	"sort"
+)
 
 func (db *JsonFileDB) CreateChirp(body string, authorId int) (chirpDomain.Chirp, error) {
 	dbStructure, err := db.loadDB()
@@ -16,7 +20,7 @@ func (db *JsonFileDB) CreateChirp(body string, authorId int) (chirpDomain.Chirp,
 	return chirp, nil
 }
 
-func (db *JsonFileDB) GetChirps(filtering chirpDomain.ChirpFiltering) ([]chirpDomain.Chirp, error) {
+func (db *JsonFileDB) GetChirps(filtering chirpDomain.ChirpFiltering, sorting common.Sorting) ([]chirpDomain.Chirp, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return nil, err
@@ -28,6 +32,14 @@ func (db *JsonFileDB) GetChirps(filtering chirpDomain.ChirpFiltering) ([]chirpDo
 			chirps = append(chirps, value)
 		}
 	}
+
+	sort.Slice(chirps, func(i, j int) bool {
+		if sorting.Direction == common.Asc {
+			return chirps[i].Id < chirps[j].Id
+		}
+		return chirps[j].Id < chirps[i].Id
+	})
+
 	return chirps, nil
 }
 

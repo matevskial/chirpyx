@@ -1,6 +1,9 @@
 package chirp
 
-import "errors"
+import (
+	"errors"
+	"github.com/matevskial/chirpyx/common"
+)
 
 var (
 	ErrChirpNotFound = errors.New("chirp not found")
@@ -18,7 +21,7 @@ type ChirpFiltering struct {
 
 type ChirpRepository interface {
 	Create(body string, authorId int) (Chirp, error)
-	FindBy(filtering ChirpFiltering) ([]Chirp, error)
+	FindBy(filtering ChirpFiltering, sorting common.Sorting) ([]Chirp, error)
 	FindById(id int) (Chirp, error)
 	DeleteByIdAndAuthorId(id int, authorId int) error
 }

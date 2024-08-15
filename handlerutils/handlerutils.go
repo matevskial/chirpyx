@@ -2,6 +2,8 @@ package handlerutils
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/matevskial/chirpyx/common"
 	"log"
 	"net/http"
 	"path"
@@ -78,4 +80,17 @@ func requestPath(method string, pathElements ...string) string {
 
 func PutRequestPath(pathElements ...string) string {
 	return requestPath(http.MethodPut, pathElements...)
+}
+
+func SetSorting(req *http.Request, sorting *common.Sorting) error {
+	sortingDirection := req.URL.Query().Get("sort")
+	if sortingDirection == "" {
+		sorting.Direction = common.Asc
+		return nil
+	}
+	if sortingDirection != common.Asc && sortingDirection != common.Desc {
+		return errors.New("error parsing sorting query parameters")
+	}
+	sorting.Direction = common.SortingDirection(sortingDirection)
+	return nil
 }

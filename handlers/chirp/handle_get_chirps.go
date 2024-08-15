@@ -1,6 +1,7 @@
 package chirp
 
 import (
+	"github.com/matevskial/chirpyx/common"
 	"github.com/matevskial/chirpyx/domain/chirp"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -12,9 +13,17 @@ func (chirpHandler *ChirpHandler) handleGetChirps(w http.ResponseWriter, req *ht
 	err := setChirpFiltering(req, &chirpFiltering)
 	if err != nil {
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "error parsing query parameters")
+		return
 	}
 
-	chirps, err := chirpHandler.chirpRepository.FindBy(chirpFiltering)
+	sorting := common.Sorting{}
+	err = handlerutils.SetSorting(req, &sorting)
+	if err != nil {
+		handlerutils.RespondWithError(w, http.StatusBadRequest, "error parsing query parameters")
+		return
+	}
+
+	chirps, err := chirpHandler.chirpRepository.FindBy(chirpFiltering, sorting)
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return
