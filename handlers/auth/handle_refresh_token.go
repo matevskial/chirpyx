@@ -2,6 +2,7 @@ package auth
 
 import (
 	"errors"
+	"github.com/matevskial/chirpyx/authutils"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -12,7 +13,7 @@ type refreshTokenResponse struct {
 }
 
 func (authenticationHandler *AuthenticationHandler) handleRefreshToken(w http.ResponseWriter, req *http.Request) {
-	refreshTokenString, err := handlerutils.GetBearerTokenString(req)
+	refreshTokenString, err := authutils.GetBearerTokenString(req)
 	if err != nil {
 		handlerutils.RespondWithUnauthorized(w)
 		return

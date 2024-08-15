@@ -1,16 +1,17 @@
 package polkaauth
 
 import (
+	"github.com/matevskial/chirpyx/authutils"
+	polkaauthDomain "github.com/matevskial/chirpyx/domain/polkaauth"
 	"github.com/matevskial/chirpyx/handlerutils"
-	"github.com/matevskial/chirpyx/polkaauth"
 	"net/http"
 )
 
 type PolkaAuthenticationMiddleware struct {
-	polkaAuthenticationService polkaauth.PolkaAuthenticationService
+	polkaAuthenticationService polkaauthDomain.PolkaAuthenticationService
 }
 
-func NewPolkaAuthenticationMiddleware(polkaAuthenticationService polkaauth.PolkaAuthenticationService) *PolkaAuthenticationMiddleware {
+func NewPolkaAuthenticationMiddleware(polkaAuthenticationService polkaauthDomain.PolkaAuthenticationService) *PolkaAuthenticationMiddleware {
 	return &PolkaAuthenticationMiddleware{polkaAuthenticationService: polkaAuthenticationService}
 }
 
@@ -22,7 +23,7 @@ func (am *PolkaAuthenticationMiddleware) AuthenticatedHandler(next http.Handler)
 			return
 		}
 
-		newReq := handlerutils.NewPolkaAuthenticatedRequest(req, authenticationPrincipal)
+		newReq := authutils.NewPolkaAuthenticatedRequest(req, authenticationPrincipal)
 		next.ServeHTTP(w, newReq)
 	})
 }

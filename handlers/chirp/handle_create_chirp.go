@@ -2,6 +2,7 @@ package chirp
 
 import (
 	"encoding/json"
+	"github.com/matevskial/chirpyx/authutils"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
 	"strings"
@@ -14,7 +15,7 @@ type chirpCreateRequest struct {
 type chirpCreateResponse = chirpDto
 
 func (chirpHandler *ChirpHandler) handleCreateChirp(w http.ResponseWriter, req *http.Request) {
-	authenticationPrincipal, err := handlerutils.GetAuthenticationPrincipalFromRequest(req)
+	authenticationPrincipal, err := authutils.GetAuthenticationPrincipalFromRequest(req)
 	if err != nil {
 		handlerutils.RespondWithUnauthorized(w)
 		return

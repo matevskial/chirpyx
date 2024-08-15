@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/matevskial/chirpyx/authutils"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -22,7 +23,7 @@ func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http
 			return
 		}
 
-		newReq := handlerutils.NewAuthenticatedRequest(req, authenticationPrincipal)
+		newReq := authutils.NewAuthenticatedRequest(req, authenticationPrincipal)
 		next.ServeHTTP(w, newReq)
 	})
 }

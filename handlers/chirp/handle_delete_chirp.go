@@ -2,6 +2,7 @@ package chirp
 
 import (
 	"errors"
+	"github.com/matevskial/chirpyx/authutils"
 	chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -9,7 +10,7 @@ import (
 )
 
 func (chirpHandler *ChirpHandler) handleDeleteChirp(w http.ResponseWriter, req *http.Request) {
-	authenticationPrincipal, err := handlerutils.GetAuthenticationPrincipalFromRequest(req)
+	authenticationPrincipal, err := authutils.GetAuthenticationPrincipalFromRequest(req)
 	if err != nil {
 		handlerutils.RespondWithUnauthorized(w)
 		return

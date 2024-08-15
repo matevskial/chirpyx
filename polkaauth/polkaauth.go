@@ -1,39 +1,29 @@
 package polkaauth
 
 import (
-	"errors"
 	"github.com/matevskial/chirpyx/authutils"
 	"github.com/matevskial/chirpyx/configuration"
+	polkaauthDomain "github.com/matevskial/chirpyx/domain/polkaauth"
 	"net/http"
 )
-
-var (
-	ErrPolkaNotAuthenticated = errors.New("polka not authenticated")
-)
-
-type PolkaAuthenticationPrincipal struct{}
-
-type PolkaAuthenticationService interface {
-	Authenticate(req *http.Request) (*PolkaAuthenticationPrincipal, error)
-}
 
 type defaultPolkaAuthenticationService struct {
 	config *configuration.Configuration
 }
 
-func (p *defaultPolkaAuthenticationService) Authenticate(req *http.Request) (*PolkaAuthenticationPrincipal, error) {
+func (p *defaultPolkaAuthenticationService) Authenticate(req *http.Request) (*polkaauthDomain.PolkaAuthenticationPrincipal, error) {
 	apiKey, err := authutils.GetApiKeyString(req)
 	if err != nil {
-		return nil, ErrPolkaNotAuthenticated
+		return nil, polkaauthDomain.ErrPolkaNotAuthenticated
 	}
 
 	if apiKey != p.config.PolkaApiKey {
-		return nil, ErrPolkaNotAuthenticated
+		return nil, polkaauthDomain.ErrPolkaNotAuthenticated
 	}
 
-	return &PolkaAuthenticationPrincipal{}, nil
+	return &polkaauthDomain.PolkaAuthenticationPrincipal{}, nil
 }
 
-func NewPolkaAuthenticationService(config *configuration.Configuration) PolkaAuthenticationService {
+func NewPolkaAuthenticationService(config *configuration.Configuration) polkaauthDomain.PolkaAuthenticationService {
 	return &defaultPolkaAuthenticationService{config: config}
 }

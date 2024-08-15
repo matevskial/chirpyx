@@ -3,9 +3,9 @@ package auth
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/matevskial/chirpyx/authutils"
 	"github.com/matevskial/chirpyx/configuration"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
-	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
 	"strconv"
 	"time"
@@ -35,7 +35,7 @@ func (jwtService *AuthenticationJwtService) GenerateToken(generateRequest authDo
 }
 
 func (jwtService *AuthenticationJwtService) Authenticate(req *http.Request) (*authDomain.AuthenticationPrincipal, error) {
-	tokenString, err := handlerutils.GetBearerTokenString(req)
+	tokenString, err := authutils.GetBearerTokenString(req)
 	if err != nil {
 		return nil, authDomain.ErrNotAuthenticated
 	}

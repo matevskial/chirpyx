@@ -10,7 +10,7 @@ import (
 )
 
 func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *http.Request) {
-	authenticationPrincipal, err := handlerutils.GetAuthenticationPrincipalFromRequest(req)
+	authenticationPrincipal, err := authutils.GetAuthenticationPrincipalFromRequest(req)
 	if err != nil {
 		handlerutils.RespondWithUnauthorized(w)
 		return

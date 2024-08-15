@@ -2,7 +2,6 @@ package handlerutils
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
 	"path"
@@ -67,24 +66,6 @@ func RespondWithUnauthorized(w http.ResponseWriter) {
 
 func RespondWithStatusCode(w http.ResponseWriter, statusCode int) {
 	respondBytes(w, "", statusCode, []byte{})
-}
-
-func GetBearerTokenString(req *http.Request) (string, error) {
-	tokenHeader := req.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(tokenHeader, "Bearer ")
-	if isInvalidTokenHeaderValue(tokenString, tokenHeader) {
-		return "", errors.New("invalid token header")
-	}
-
-	if len(strings.TrimSpace(tokenString)) == 0 {
-		return "", errors.New("invalid token header")
-	}
-
-	return tokenString, nil
-}
-
-func isInvalidTokenHeaderValue(tokenString, tokenHeader string) bool {
-	return len(tokenString) == len(tokenHeader)
 }
 
 func PostRequestPath(pathElements ...string) string {

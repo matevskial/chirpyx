@@ -1,25 +1,21 @@
 package authutils
 
 import (
-	"errors"
+	"context"
+	polkaauthDomain "github.com/matevskial/chirpyx/domain/polkaauth"
 	"net/http"
-	"strings"
 )
 
-func GetApiKeyString(req *http.Request) (string, error) {
-	tokenHeader := req.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(tokenHeader, "ApiKey ")
-	if isInvalidTokenHeaderValue(tokenString, tokenHeader) {
-		return "", errors.New("invalid token header")
-	}
+type polkaAuthenticationPrincipalContextKey = string
 
-	if len(strings.TrimSpace(tokenString)) == 0 {
-		return "", errors.New("invalid token header")
-	}
+const polkaAuthenticationPrincipalContextKeyValue = polkaAuthenticationPrincipalContextKey("polkaAuthenticationPrincipal")
 
-	return tokenString, nil
+func NewPolkaAuthenticatedRequest(req *http.Request, polkaAuthenticationPrincipal *polkaauthDomain.PolkaAuthenticationPrincipal) *http.Request {
+	oldContext := req.Context()
+	newContext := context.WithValue(oldContext, polkaAuthenticationPrincipalContextKeyValue, polkaAuthenticationPrincipal)
+	return req.WithContext(newContext)
 }
 
-func isInvalidTokenHeaderValue(tokenString, tokenHeader string) bool {
-	return len(tokenString) == len(tokenHeader)
+func GetApiKeyString(req *http.Request) (string, error) {
+	return getAuthorizationString(req, "ApiKey")
 }
