@@ -3,7 +3,7 @@ package auth
 import (
 	"encoding/json"
 	"errors"
-	"github.com/matevskial/chirpyx/auth"
+	"github.com/matevskial/chirpyx/authutils"
 	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"github.com/matevskial/chirpyx/handlerutils"
@@ -41,7 +41,7 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 		return
 	}
 
-	passwordMatchError := auth.ComparePasswordWithHash(userLoginRequest.Password, user.HashedPassword)
+	passwordMatchError := authutils.ComparePasswordWithHash(userLoginRequest.Password, user.HashedPassword)
 	if passwordMatchError != nil {
 		handlerutils.RespondWithError(w, http.StatusUnauthorized, "User not found or password mismatch")
 		return

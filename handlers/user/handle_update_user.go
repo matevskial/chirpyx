@@ -3,7 +3,7 @@ package user
 import (
 	"encoding/json"
 	"errors"
-	"github.com/matevskial/chirpyx/auth"
+	"github.com/matevskial/chirpyx/authutils"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
@@ -34,7 +34,7 @@ func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	hashedPassword, err := auth.HashPassword(userUpdateRequest.Password)
+	hashedPassword, err := authutils.HashPassword(userUpdateRequest.Password)
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
 		return
