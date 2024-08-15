@@ -49,6 +49,6 @@ func (userHandler *UserHandler) handleUpdateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	userUpdateResponse := userCreateUpdateResponse{Id: user.Id, Email: user.Email}
+	userUpdateResponse := userCreateUpdateResponse{Id: user.Id, Email: user.Email, IsChirpyRed: user.IsChirpyRed}
 	handlerutils.RespondWithJson(w, http.StatusOK, userUpdateResponse)
 }

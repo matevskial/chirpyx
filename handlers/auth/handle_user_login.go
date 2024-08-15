@@ -18,6 +18,7 @@ type userLoginRequest struct {
 type loggedUserResponseDto struct {
 	Id           int    `json:"id"`
 	Email        string `json:"email"`
+	IsChirpyRed  bool   `json:"is_chirpy_red"`
 	Token        string `json:"token"`
 	RefreshToken string `json:"refresh_token"`
 }
@@ -63,6 +64,7 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 	loggedUser := loggedUserResponseDto{
 		Id:           user.Id,
 		Email:        user.Email,
+		IsChirpyRed:  user.IsChirpyRed,
 		Token:        token,
 		RefreshToken: refreshTokenString,
 	}

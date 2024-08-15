@@ -26,7 +26,7 @@ func (r *UserJsonFileRepository) GetUserWithPasswordByEmail(email string) (userD
 	if err != nil {
 		return userDomain.UserWithPassword{}, err
 	}
-	return userDomain.UserWithPassword{Id: user.Id, Email: user.Email, HashedPassword: user.HashedPassword}, nil
+	return userDomain.UserWithPassword{Id: user.Id, Email: user.Email, HashedPassword: user.HashedPassword, IsChirpyRed: user.IsChirpyRed}, nil
 }
 
 func (r *UserJsonFileRepository) ExistsByEmailAndIdIsNot(email string, id int) (bool, error) {

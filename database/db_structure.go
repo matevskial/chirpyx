@@ -31,7 +31,7 @@ func (s *DBStructure) addChirp(chirp chirpDomain.Chirp) {
 func (s *DBStructure) addUser(user User) userDomain.User {
 	s.Users[user.Id] = user
 	s.UserIdSeq++
-	return userDomain.User{Id: user.Id, Email: user.Email}
+	return userDomain.User{Id: user.Id, Email: user.Email, IsChirpyRed: user.IsChirpyRed}
 }
 
 func (s *DBStructure) updateUser(id int, email string, hashedPassword string) (userDomain.User, error) {
@@ -42,7 +42,7 @@ func (s *DBStructure) updateUser(id int, email string, hashedPassword string) (u
 	user.Email = email
 	user.HashedPassword = hashedPassword
 	s.Users[id] = user
-	return userDomain.User{Id: user.Id, Email: user.Email}, nil
+	return userDomain.User{Id: user.Id, Email: user.Email, IsChirpyRed: user.IsChirpyRed}, nil
 }
 
 func (s *DBStructure) deleteChirpByIdAndAuthorId(chirpId int, authorId int) error {

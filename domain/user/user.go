@@ -7,14 +7,16 @@ var (
 )
 
 type User struct {
-	Id    int
-	Email string
+	Id          int
+	Email       string
+	IsChirpyRed bool
 }
 
 type UserWithPassword struct {
 	Id             int
 	Email          string
 	HashedPassword string
+	IsChirpyRed    bool
 }
 
 type UserRepository interface {

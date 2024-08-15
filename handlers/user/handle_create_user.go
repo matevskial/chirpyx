@@ -38,6 +38,6 @@ func (userHandler *UserHandler) handleCreateUser(w http.ResponseWriter, req *htt
 		return
 	}
 
-	userCreateResponse := userCreateUpdateResponse{Id: user.Id, Email: user.Email}
+	userCreateResponse := userCreateUpdateResponse{Id: user.Id, Email: user.Email, IsChirpyRed: user.IsChirpyRed}
 	handlerutils.RespondWithJson(w, http.StatusCreated, userCreateResponse)
 }

@@ -6,6 +6,7 @@ type User struct {
 	Id             int
 	Email          string
 	HashedPassword string
+	IsChirpyRed    bool
 }
 
 func (db *JsonFileDB) CreateUser(email string, hashedPassword string) (userDomain.User, error) {
