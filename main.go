@@ -6,6 +6,7 @@ import (
 	"github.com/matevskial/chirpyx/database"
 	authHandler "github.com/matevskial/chirpyx/handlers/auth"
 	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
+	polkaHandler "github.com/matevskial/chirpyx/handlers/polka"
 	userHandler "github.com/matevskial/chirpyx/handlers/user"
 	authMiddleware "github.com/matevskial/chirpyx/middlewares/auth"
 	chirpRepository "github.com/matevskial/chirpyx/repository/chirp"
@@ -43,6 +44,8 @@ func main() {
 
 	authenticationHndlr := authHandler.NewAuthenticationHandler("/api/login", userRepo, authenticationService, refreshTokenService)
 
+	polkaHandlr := polkaHandler.NewPolkaHandler(userRepo)
+
 	httpServeMux := http.NewServeMux()
 
 	/*
@@ -58,6 +61,8 @@ func main() {
 	httpServeMux.Handle("POST /api/login", authenticationHndlr.LoginHandler())
 	httpServeMux.Handle("POST /api/refresh", authenticationHndlr.RefreshTokenHandler())
 	httpServeMux.Handle("POST /api/revoke", authenticationHndlr.RevokeRefreshTokenHandler())
+	httpServeMux.Handle("/api/polka/", polkaHandlr.Handler("/api/polka"))
+
 	httpServer := http.Server{
 		Handler: httpServeMux,
 		Addr:    ":8080",

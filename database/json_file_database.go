@@ -55,3 +55,15 @@ func (db *JsonFileDB) writeDB(dbStructure DBStructure) error {
 
 	return os.WriteFile(db.path, data, 0666)
 }
+
+func (db *JsonFileDB) UpgradeUserToChirpyRed(id int) error {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+	err = dbStructure.upgradeUserToChirpyRed(id)
+	if err != nil {
+		return err
+	}
+	return db.writeDB(dbStructure)
+}

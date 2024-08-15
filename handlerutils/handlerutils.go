@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"path"
 	"strings"
 )
 
@@ -84,4 +85,12 @@ func GetBearerTokenString(req *http.Request) (string, error) {
 
 func isInvalidTokenHeaderValue(tokenString, tokenHeader string) bool {
 	return len(tokenString) == len(tokenHeader)
+}
+
+func PostRequestPath(pathElements ...string) string {
+	return requestPath(http.MethodPost, pathElements...)
+}
+
+func requestPath(method string, elements ...string) string {
+	return strings.Join([]string{method, path.Join(elements...)}, " ")
 }

@@ -1,6 +1,8 @@
 package database
 
-import userDomain "github.com/matevskial/chirpyx/domain/user"
+import (
+	userDomain "github.com/matevskial/chirpyx/domain/user"
+)
 
 type User struct {
 	Id             int
@@ -83,4 +85,13 @@ func (db *JsonFileDB) UpdateUser(id int, email string, hashedPassword string) (u
 		return userDomain.User{}, err
 	}
 	return user, nil
+}
+
+func (db *JsonFileDB) GetUserById(id int) (userDomain.User, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return userDomain.User{}, err
+	}
+
+	return dbStructure.getUserById(id)
 }

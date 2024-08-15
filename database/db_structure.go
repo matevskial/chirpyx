@@ -61,3 +61,21 @@ func (s *DBStructure) getChirpById(id int) (chirpDomain.Chirp, error) {
 	}
 	return chirp, nil
 }
+
+func (s *DBStructure) getUserById(id int) (userDomain.User, error) {
+	user, exists := s.Users[id]
+	if !exists {
+		return userDomain.User{}, userDomain.ErrUserNotFound
+	}
+	return userDomain.User{Id: user.Id, Email: user.Email, IsChirpyRed: user.IsChirpyRed}, nil
+}
+
+func (s *DBStructure) upgradeUserToChirpyRed(id int) error {
+	user, exists := s.Users[id]
+	if !exists {
+		return userDomain.ErrUserNotFound
+	}
+	user.IsChirpyRed = true
+	s.Users[id] = user
+	return nil
+}

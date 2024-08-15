@@ -36,3 +36,11 @@ func (r *UserJsonFileRepository) ExistsByEmailAndIdIsNot(email string, id int) (
 func (r *UserJsonFileRepository) Update(id int, email, hashedPassword string) (userDomain.User, error) {
 	return r.db.UpdateUser(id, email, hashedPassword)
 }
+
+func (r *UserJsonFileRepository) FindById(id int) (userDomain.User, error) {
+	return r.db.GetUserById(id)
+}
+
+func (r *UserJsonFileRepository) UpgradeToChirpyRed(id int) error {
+	return r.db.UpgradeUserToChirpyRed(id)
+}

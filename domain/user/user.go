@@ -25,4 +25,6 @@ type UserRepository interface {
 	GetUserWithPasswordByEmail(email string) (UserWithPassword, error)
 	ExistsByEmailAndIdIsNot(email string, id int) (bool, error)
 	Update(id int, email string, hashedPassword string) (User, error)
+	FindById(id int) (User, error)
+	UpgradeToChirpyRed(id int) error
 }
