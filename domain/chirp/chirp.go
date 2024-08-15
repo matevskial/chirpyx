@@ -12,9 +12,13 @@ type Chirp struct {
 	AuthorId int
 }
 
+type ChirpFiltering struct {
+	AuthorId int
+}
+
 type ChirpRepository interface {
 	Create(body string, authorId int) (Chirp, error)
-	FindAll() ([]Chirp, error)
+	FindBy(filtering ChirpFiltering) ([]Chirp, error)
 	FindById(id int) (Chirp, error)
 	DeleteByIdAndAuthorId(id int, authorId int) error
 }

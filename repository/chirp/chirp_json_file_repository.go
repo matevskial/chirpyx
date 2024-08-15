@@ -17,8 +17,8 @@ func (r *ChirpJsonFileRepository) Create(body string, authorId int) (chirp.Chirp
 	return r.db.CreateChirp(body, authorId)
 }
 
-func (r *ChirpJsonFileRepository) FindAll() ([]chirp.Chirp, error) {
-	return r.db.GetChirps()
+func (r *ChirpJsonFileRepository) FindBy(filtering chirp.ChirpFiltering) ([]chirp.Chirp, error) {
+	return r.db.GetChirps(filtering)
 }
 
 func (r *ChirpJsonFileRepository) FindById(id int) (chirp.Chirp, error) {
