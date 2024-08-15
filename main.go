@@ -9,6 +9,8 @@ import (
 	polkaHandler "github.com/matevskial/chirpyx/handlers/polka"
 	userHandler "github.com/matevskial/chirpyx/handlers/user"
 	authMiddleware "github.com/matevskial/chirpyx/middlewares/auth"
+	polkaAuthMiddleware "github.com/matevskial/chirpyx/middlewares/polkaauth"
+	"github.com/matevskial/chirpyx/polkaauth"
 	chirpRepository "github.com/matevskial/chirpyx/repository/chirp"
 	userRepository "github.com/matevskial/chirpyx/repository/user"
 	"log"
@@ -28,6 +30,7 @@ func main() {
 
 	authenticationService := auth.NewAuthenticationJwtService(config)
 	refreshTokenService := auth.NewRefreshTokenService(db)
+	polkaAuthenticationService := polkaauth.NewPolkaAuthenticationService(config)
 
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
@@ -35,6 +38,7 @@ func main() {
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
 	authenticationMiddleware := authMiddleware.NewAuthenticationMiddleware(authenticationService)
+	polkaAuthenticationMiddleware := polkaAuthMiddleware.NewPolkaAuthenticationMiddleware(polkaAuthenticationService)
 
 	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
 	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo, authenticationMiddleware)
@@ -61,7 +65,7 @@ func main() {
 	httpServeMux.Handle("POST /api/login", authenticationHndlr.LoginHandler())
 	httpServeMux.Handle("POST /api/refresh", authenticationHndlr.RefreshTokenHandler())
 	httpServeMux.Handle("POST /api/revoke", authenticationHndlr.RevokeRefreshTokenHandler())
-	httpServeMux.Handle("/api/polka/", polkaHandlr.Handler("/api/polka"))
+	httpServeMux.Handle("/api/polka/", polkaAuthenticationMiddleware.AuthenticatedHandler(polkaHandlr.Handler("/api/polka")))
 
 	httpServer := http.Server{
 		Handler: httpServeMux,

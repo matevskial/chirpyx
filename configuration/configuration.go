@@ -12,9 +12,10 @@ import (
 const defaultIssuer = "chirpy"
 
 type Configuration struct {
-	IsDevMode bool
-	JwtSecret string
-	JwtIssuer string
+	IsDevMode   bool
+	JwtSecret   string
+	JwtIssuer   string
+	PolkaApiKey string
 }
 
 func Parse() (*Configuration, error) {
@@ -48,6 +49,9 @@ func Parse() (*Configuration, error) {
 	} else {
 		config.JwtIssuer = jwtIssuerFromEnv
 	}
+
+	polkaApiKeyFromEnv := os.Getenv("POLKA_API_KEY")
+	config.PolkaApiKey = polkaApiKeyFromEnv
 
 	return &config, nil
 }
