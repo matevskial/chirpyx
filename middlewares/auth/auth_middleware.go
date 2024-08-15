@@ -11,8 +11,8 @@ type AuthenticationMiddleware struct {
 	authenticationService authDomain.AuthenticationService
 }
 
-func NewAuthenticationMiddleware(jwtService authDomain.AuthenticationService) *AuthenticationMiddleware {
-	return &AuthenticationMiddleware{authenticationService: jwtService}
+func NewAuthenticationMiddleware(authenticationService authDomain.AuthenticationService) *AuthenticationMiddleware {
+	return &AuthenticationMiddleware{authenticationService: authenticationService}
 }
 
 func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http.Handler {

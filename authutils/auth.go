@@ -6,13 +6,13 @@ import (
 	"net/http"
 )
 
-type tokenContextKey = string
+type authenticationPrincipalContextKey = string
 
-const tokenContextKeyValue = tokenContextKey("token")
+const authenticationPrincipalContextValue = authenticationPrincipalContextKey("token")
 
 func GetAuthenticationPrincipalFromRequest(req *http.Request) (*authDomain.AuthenticationPrincipal, error) {
 	ctx := req.Context()
-	authenticationPrincipal, ok := ctx.Value(tokenContextKeyValue).(*authDomain.AuthenticationPrincipal)
+	authenticationPrincipal, ok := ctx.Value(authenticationPrincipalContextValue).(*authDomain.AuthenticationPrincipal)
 	if !ok {
 		return nil, authDomain.ErrNotAuthenticated
 	}
@@ -21,7 +21,7 @@ func GetAuthenticationPrincipalFromRequest(req *http.Request) (*authDomain.Authe
 
 func NewAuthenticatedRequest(req *http.Request, authenticationPrincipal *authDomain.AuthenticationPrincipal) *http.Request {
 	oldContext := req.Context()
-	newContext := context.WithValue(oldContext, tokenContextKeyValue, authenticationPrincipal)
+	newContext := context.WithValue(oldContext, authenticationPrincipalContextValue, authenticationPrincipal)
 	return req.WithContext(newContext)
 }
 
