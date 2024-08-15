@@ -2,12 +2,13 @@ package user
 
 import (
 	userDomain "github.com/matevskial/chirpyx/domain/user"
+	"github.com/matevskial/chirpyx/handlerutils"
 	"github.com/matevskial/chirpyx/middlewares/auth"
 	"net/http"
+	"path"
 )
 
 type UserHandler struct {
-	Path                     string
 	userRepository           userDomain.UserRepository
 	authenticationMiddleware *auth.AuthenticationMiddleware
 }
@@ -23,13 +24,14 @@ type userCreateUpdateResponse struct {
 	IsChirpyRed bool   `json:"is_chirpy_red"`
 }
 
-func NewUserHandler(path string, userRepository userDomain.UserRepository, authenticationMiddleware *auth.AuthenticationMiddleware) *UserHandler {
-	return &UserHandler{Path: path, userRepository: userRepository, authenticationMiddleware: authenticationMiddleware}
+func NewUserHandler(userRepository userDomain.UserRepository, authenticationMiddleware *auth.AuthenticationMiddleware) *UserHandler {
+	return &UserHandler{userRepository: userRepository, authenticationMiddleware: authenticationMiddleware}
 }
 
-func (userHandler *UserHandler) Handler() http.Handler {
+func (userHandler *UserHandler) Handler(pathPrefix string) http.Handler {
 	httpServeMux := http.NewServeMux()
-	httpServeMux.HandleFunc("POST"+" "+userHandler.Path, userHandler.handleCreateUser)
-	httpServeMux.Handle("PUT"+" "+userHandler.Path, userHandler.authenticationMiddleware.AuthenticatedHandler(http.HandlerFunc(userHandler.handleUpdateUser)))
+	cleanedPathPrefix := path.Clean(pathPrefix)
+	httpServeMux.HandleFunc(handlerutils.PostRequestPath(cleanedPathPrefix), userHandler.handleCreateUser)
+	httpServeMux.Handle(handlerutils.PutRequestPath(cleanedPathPrefix), userHandler.authenticationMiddleware.AuthenticatedHandler(http.HandlerFunc(userHandler.handleUpdateUser)))
 	return httpServeMux
 }

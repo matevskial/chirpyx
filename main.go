@@ -40,7 +40,7 @@ func main() {
 	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo, authenticationMiddleware)
 
 	userRepo := userRepository.NewUserJsonFileRepository(db)
-	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)
+	userHndlr := userHandler.NewUserHandler(userRepo, authenticationMiddleware)
 
 	authenticationHndlr := authHandler.NewAuthenticationHandler("/api/login", userRepo, authenticationService, refreshTokenService)
 
@@ -57,7 +57,7 @@ func main() {
 	httpServeMux.Handle("GET /api/reset", httpFileServerMetrics.resetHandler())
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
 	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHndlr.Handler()))
-	httpServeMux.Handle(userHndlr.Path, userHndlr.Handler())
+	httpServeMux.Handle("/api/users", userHndlr.Handler("/api/users"))
 	httpServeMux.Handle("POST /api/login", authenticationHndlr.LoginHandler())
 	httpServeMux.Handle("POST /api/refresh", authenticationHndlr.RefreshTokenHandler())
 	httpServeMux.Handle("POST /api/revoke", authenticationHndlr.RevokeRefreshTokenHandler())

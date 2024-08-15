@@ -91,6 +91,10 @@ func PostRequestPath(pathElements ...string) string {
 	return requestPath(http.MethodPost, pathElements...)
 }
 
-func requestPath(method string, elements ...string) string {
-	return strings.Join([]string{method, path.Join(elements...)}, " ")
+func requestPath(method string, pathElements ...string) string {
+	return strings.Join([]string{method, path.Join(pathElements...)}, " ")
+}
+
+func PutRequestPath(pathElements ...string) string {
+	return requestPath(http.MethodPut, pathElements...)
 }
