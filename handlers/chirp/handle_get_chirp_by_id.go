@@ -8,6 +8,11 @@ import (
 	"strconv"
 )
 
+type chirpByIdDto struct {
+	Id   int    `json:"id"`
+	Body string `json:"body"`
+}
+
 func (chirpHandler *ChirpHandler) getChirpById(w http.ResponseWriter, req *http.Request) {
 	idStr := req.PathValue("id")
 	id, err := strconv.Atoi(idStr)
@@ -26,6 +31,6 @@ func (chirpHandler *ChirpHandler) getChirpById(w http.ResponseWriter, req *http.
 		return
 	}
 
-	chirpDto := chirpDto{Id: chirp.Id, Body: chirp.Body}
+	chirpDto := chirpByIdDto{Id: chirp.Id, Body: chirp.Body}
 	handlerutils.RespondWithJson(w, http.StatusOK, chirpDto)
 }

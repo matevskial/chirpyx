@@ -53,3 +53,11 @@ func (s *DBStructure) deleteChirpByIdAndAuthorId(chirpId int, authorId int) erro
 	delete(s.Chirps, chirpId)
 	return nil
 }
+
+func (s *DBStructure) getChirpById(id int) (chirpDomain.Chirp, error) {
+	chirp, exists := s.Chirps[id]
+	if !exists {
+		return chirpDomain.Chirp{}, chirpDomain.ErrChirpNotFound
+	}
+	return chirp, nil
+}
