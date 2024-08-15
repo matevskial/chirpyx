@@ -25,6 +25,7 @@ func main() {
 	}
 
 	jwtService := auth.NewJwtService(config)
+	refreshTokenService := auth.NewRefreshTokenService(db)
 
 	staticContentDir := http.Dir(".")
 	httpFileServerPrefix := "/app/"
@@ -39,7 +40,7 @@ func main() {
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)
 
-	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo, jwtService)
+	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo, jwtService, refreshTokenService)
 
 	httpServeMux := http.NewServeMux()
 
@@ -53,8 +54,9 @@ func main() {
 	httpServeMux.Handle("GET /admin/metrics", httpFileServerMetrics.metricsAdminHandler())
 	httpServeMux.Handle("/api/", http.StripPrefix("/api", chirpHndlr.Handler()))
 	httpServeMux.Handle(userHndlr.Path, userHndlr.Handler())
-	httpServeMux.Handle("/api/login", authenticationHndlr.LoginHandler())
-
+	httpServeMux.Handle("POST /api/login", authenticationHndlr.LoginHandler())
+	httpServeMux.Handle("POST /api/refresh", authenticationHndlr.RefreshTokenHandler())
+	httpServeMux.Handle("POST /api/revoke", authenticationHndlr.RevokeRefreshTokenHandler())
 	httpServer := http.Server{
 		Handler: httpServeMux,
 		Addr:    ":8080",

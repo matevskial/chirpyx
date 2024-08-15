@@ -2,26 +2,40 @@ package authentication
 
 import (
 	"github.com/matevskial/chirpyx/auth"
+	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"net/http"
 )
 
-type loggedUserResponseDto struct {
-	Id    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
-}
-
 type AuthenticationHandler struct {
-	Path           string
-	userRepository userDomain.UserRepository
-	jwtService     *auth.JwtService
+	Path                string
+	userRepository      userDomain.UserRepository
+	jwtService          *auth.JwtService
+	refreshTokenService authDomain.RefreshTokenService
 }
 
-func NewAuthenticationHandler(path string, userRepository userDomain.UserRepository, jwtService *auth.JwtService) *AuthenticationHandler {
-	return &AuthenticationHandler{Path: path, userRepository: userRepository, jwtService: jwtService}
+func NewAuthenticationHandler(
+	path string,
+	userRepository userDomain.UserRepository,
+	jwtService *auth.JwtService,
+	refreshTokenService authDomain.RefreshTokenService,
+) *AuthenticationHandler {
+	return &AuthenticationHandler{
+		Path:                path,
+		userRepository:      userRepository,
+		jwtService:          jwtService,
+		refreshTokenService: refreshTokenService,
+	}
 }
 
 func (authenticationHandler *AuthenticationHandler) LoginHandler() http.Handler {
 	return http.HandlerFunc(authenticationHandler.handleUserLogin)
+}
+
+func (authenticationHandler *AuthenticationHandler) RefreshTokenHandler() http.Handler {
+	return http.HandlerFunc(authenticationHandler.handleRefreshToken)
+}
+
+func (authenticationHandler *AuthenticationHandler) RevokeRefreshTokenHandler() http.Handler {
+	return http.HandlerFunc(authenticationHandler.handleRevokeRefreshToken)
 }

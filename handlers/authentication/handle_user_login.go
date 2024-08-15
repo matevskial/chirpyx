@@ -10,9 +10,15 @@ import (
 )
 
 type userLoginRequest struct {
-	Email            string `json:"email"`
-	Password         string `json:"password"`
-	ExpiresInSeconds int    `json:"expires_in_seconds"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type loggedUserResponseDto struct {
+	Id           int    `json:"id"`
+	Email        string `json:"email"`
+	Token        string `json:"token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.ResponseWriter, req *http.Request) {
@@ -39,7 +45,14 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 		return
 	}
 
-	token, err := authenticationHandler.jwtService.GenerateJwtFor(auth.JwtGenerateRequest{UserId: user.Id, ExpiresInSeconds: userLoginRequest.ExpiresInSeconds})
+	token, err := authenticationHandler.jwtService.GenerateJwtFor(auth.JwtGenerateRequest{UserId: user.Id})
+
+	if err != nil {
+		handlerutils.RespondWithInternalServerError(w)
+		return
+	}
+
+	refreshTokenString, err := authenticationHandler.refreshTokenService.CreateRefreshToken(user.Id)
 
 	if err != nil {
 		handlerutils.RespondWithInternalServerError(w)
@@ -47,9 +60,10 @@ func (authenticationHandler *AuthenticationHandler) handleUserLogin(w http.Respo
 	}
 
 	loggedUser := loggedUserResponseDto{
-		Id:    user.Id,
-		Email: user.Email,
-		Token: token,
+		Id:           user.Id,
+		Email:        user.Email,
+		Token:        token,
+		RefreshToken: refreshTokenString,
 	}
 	handlerutils.RespondWithJson(w, http.StatusOK, loggedUser)
 }

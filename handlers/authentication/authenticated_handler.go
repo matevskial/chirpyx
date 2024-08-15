@@ -1,11 +1,9 @@
 package authentication
 
 import (
-	"errors"
 	"github.com/matevskial/chirpyx/auth"
 	"github.com/matevskial/chirpyx/handlerutils"
 	"net/http"
-	"strings"
 )
 
 type AuthenticationMiddleware struct {
@@ -18,7 +16,7 @@ func NewAuthenticationMiddleware(jwtService *auth.JwtService) *AuthenticationMid
 
 func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		tokenString, err := getTokenString(req)
+		tokenString, err := handlerutils.GetBearerTokenString(req)
 		if err != nil {
 			handlerutils.RespondWithUnauthorized(w)
 			return
@@ -34,22 +32,4 @@ func (am *AuthenticationMiddleware) AuthenticatedHandler(next http.Handler) http
 		newContext := auth.NewContextWithTokenValue(oldContext, token)
 		next.ServeHTTP(w, req.WithContext(newContext))
 	})
-}
-
-func getTokenString(req *http.Request) (string, error) {
-	tokenHeader := req.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(tokenHeader, "Bearer ")
-	if isInvalidTokenHeaderValue(tokenString, tokenHeader) {
-		return "", errors.New("invalid token header")
-	}
-
-	if len(strings.TrimSpace(tokenString)) == 0 {
-		return "", errors.New("invalid token header")
-	}
-
-	return tokenString, nil
-}
-
-func isInvalidTokenHeaderValue(tokenString, tokenHeader string) bool {
-	return len(tokenString) == len(tokenHeader)
 }

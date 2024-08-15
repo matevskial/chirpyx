@@ -3,10 +3,12 @@ package database
 import (
 	"encoding/json"
 	"errors"
+	authDomain "github.com/matevskial/chirpyx/domain/auth"
 	chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
 	userDomain "github.com/matevskial/chirpyx/domain/user"
 	"os"
 	"sync"
+	"time"
 )
 
 type JsonFileDB struct {
@@ -20,19 +22,27 @@ type User struct {
 	HashedPassword string
 }
 
+type RefreshToken struct {
+	UserId             int
+	RefreshTokenString string
+	ExpiresAt          time.Time
+}
+
 type DBStructure struct {
-	Chirps     map[int]chirpDomain.Chirp `json:"chirps"`
-	Users      map[int]User              `json:"users"`
-	ChirpIdSeq int                       `json:"idSeq"`
-	UserIdSeq  int                       `json:"userIdSeq"`
+	Chirps               map[int]chirpDomain.Chirp `json:"chirps"`
+	Users                map[int]User              `json:"users"`
+	RefreshTokensByUsers map[int]RefreshToken      `json:"refresh_tokens"`
+	ChirpIdSeq           int                       `json:"idSeq"`
+	UserIdSeq            int                       `json:"userIdSeq"`
 }
 
 func newDbStructure() DBStructure {
 	return DBStructure{
-		Chirps:     make(map[int]chirpDomain.Chirp),
-		Users:      make(map[int]User),
-		ChirpIdSeq: 1,
-		UserIdSeq:  1,
+		Chirps:               make(map[int]chirpDomain.Chirp),
+		Users:                make(map[int]User),
+		RefreshTokensByUsers: make(map[int]RefreshToken),
+		ChirpIdSeq:           1,
+		UserIdSeq:            1,
 	}
 }
 
@@ -170,6 +180,55 @@ func (db *JsonFileDB) UpdateUser(id int, email string, hashedPassword string) (u
 		return userDomain.User{}, err
 	}
 	return user, nil
+}
+
+func (db *JsonFileDB) GetRefreshToken(refreshTokenString string) (authDomain.RefreshToken, error) {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return authDomain.RefreshToken{}, err
+	}
+
+	for _, value := range dbStructure.RefreshTokensByUsers {
+		if value.RefreshTokenString == refreshTokenString {
+			return authDomain.RefreshToken{UserId: value.UserId, RefreshTokenString: value.RefreshTokenString, ExpiresAt: value.ExpiresAt}, nil
+		}
+	}
+
+	return authDomain.RefreshToken{}, authDomain.ErrRefreshTokenNotFound
+}
+
+func (db *JsonFileDB) RevokeRefreshToken(refreshTokenString string) error {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	var refreshToken *RefreshToken = nil
+	for _, value := range dbStructure.RefreshTokensByUsers {
+		if value.RefreshTokenString == refreshTokenString {
+			refreshToken = &value
+			break
+		}
+	}
+
+	if refreshToken == nil {
+		return authDomain.ErrRefreshTokenNotFound
+	}
+
+	delete(dbStructure.RefreshTokensByUsers, refreshToken.UserId)
+
+	return db.writeDB(dbStructure)
+}
+
+func (db *JsonFileDB) SetRefreshToken(userId int, refreshTokenString string, expiresAt time.Time) error {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	dbStructure.RefreshTokensByUsers[userId] = RefreshToken{UserId: userId, RefreshTokenString: refreshTokenString, ExpiresAt: expiresAt}
+
+	return db.writeDB(dbStructure)
 }
 
 func (db *JsonFileDB) ensureDB(shouldTruncateExistingFile bool) error {

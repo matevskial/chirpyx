@@ -2,8 +2,10 @@ package handlerutils
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type errorResponse struct {
@@ -20,11 +22,13 @@ func respond(w http.ResponseWriter, contentType string, statusCode int, content 
 }
 
 func respondBytes(w http.ResponseWriter, contentType string, statusCode int, content []byte) {
-	w.Header().Set("Content-Type", contentType)
 	w.WriteHeader(statusCode)
-	_, err := w.Write(content)
-	if err != nil {
-		http.Error(w, "Internal server error", 500)
+	if len(contentType) != 0 {
+		w.Header().Set("Content-Type", contentType)
+		_, err := w.Write(content)
+		if err != nil {
+			http.Error(w, "Internal server error", 500)
+		}
 	}
 }
 
@@ -58,4 +62,26 @@ func RespondWithInternalServerError(w http.ResponseWriter) {
 
 func RespondWithUnauthorized(w http.ResponseWriter) {
 	RespondWithError(w, http.StatusUnauthorized, "unauthorized")
+}
+
+func RespondWithStatusCode(w http.ResponseWriter, statusCode int) {
+	respondBytes(w, "", statusCode, []byte{})
+}
+
+func GetBearerTokenString(req *http.Request) (string, error) {
+	tokenHeader := req.Header.Get("Authorization")
+	tokenString := strings.TrimPrefix(tokenHeader, "Bearer ")
+	if isInvalidTokenHeaderValue(tokenString, tokenHeader) {
+		return "", errors.New("invalid token header")
+	}
+
+	if len(strings.TrimSpace(tokenString)) == 0 {
+		return "", errors.New("invalid token header")
+	}
+
+	return tokenString, nil
+}
+
+func isInvalidTokenHeaderValue(tokenString, tokenHeader string) bool {
+	return len(tokenString) == len(tokenHeader)
 }

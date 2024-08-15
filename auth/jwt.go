@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/matevskial/chirpyx/configuration"
+	"github.com/matevskial/chirpyx/domain/auth"
 	"time"
 )
-
-const defaultExpiresAfter = 24 * time.Hour
 
 type JwtService struct {
 	config *configuration.Configuration
@@ -18,13 +17,12 @@ func NewJwtService(config *configuration.Configuration) *JwtService {
 }
 
 type JwtGenerateRequest struct {
-	UserId           int
-	ExpiresInSeconds int
+	UserId int
 }
 
 func (jwtService *JwtService) GenerateJwtFor(generateRequest JwtGenerateRequest) (string, error) {
 	now := time.Now().UTC()
-	expiresAfter := getExpiresAfter(generateRequest.ExpiresInSeconds)
+	expiresAfter := getExpiresAfter()
 	expiresAt := now.Add(expiresAfter)
 	claims := jwt.RegisteredClaims{
 		Issuer:    jwtService.config.JwtIssuer,
@@ -43,16 +41,6 @@ func (jwtService *JwtService) ParseToken(tokenString string) (*jwt.Token, error)
 	})
 }
 
-func getExpiresAfter(seconds int) time.Duration {
-	if seconds == 0 {
-		return defaultExpiresAfter
-	}
-
-	h := time.Duration(seconds) * time.Second
-
-	if h > defaultExpiresAfter {
-		return defaultExpiresAfter
-	}
-
-	return h
+func getExpiresAfter() time.Duration {
+	return auth.AccessTokenExpiresAfterInHours * time.Hour
 }
