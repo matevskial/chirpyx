@@ -7,12 +7,13 @@ var (
 )
 
 type Chirp struct {
-	Id   int
-	Body string
+	Id       int
+	Body     string
+	AuthorId int
 }
 
 type ChirpRepository interface {
-	Create(body string) (Chirp, error)
+	Create(body string, authorId int) (Chirp, error)
 	FindAll() ([]Chirp, error)
 	FindById(id int) (Chirp, error)
 }

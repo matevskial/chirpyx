@@ -14,9 +14,15 @@ type chirpCreateRequest struct {
 type chirpCreateResponse = chirpDto
 
 func (chirpHandler *ChirpHandler) handleCreateChirp(w http.ResponseWriter, req *http.Request) {
+	authenticationPrincipal, err := handlerutils.GetAuthenticationPrincipalFromRequest(req)
+	if err != nil {
+		handlerutils.RespondWithUnauthorized(w)
+		return
+	}
+
 	chirpCreateRequest := chirpCreateRequest{}
 	decoder := json.NewDecoder(req.Body)
-	err := decoder.Decode(&chirpCreateRequest)
+	err = decoder.Decode(&chirpCreateRequest)
 	if err != nil {
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "Couldn't decode body")
 		return
@@ -25,12 +31,12 @@ func (chirpHandler *ChirpHandler) handleCreateChirp(w http.ResponseWriter, req *
 	switch isValidChirp(chirpCreateRequest) {
 	case true:
 		cleanedBody := cleanBody(chirpCreateRequest)
-		createdChirp, err := chirpHandler.chirpRepository.Create(cleanedBody)
+		createdChirp, err := chirpHandler.chirpRepository.Create(cleanedBody, authenticationPrincipal.UserId)
 		if err != nil {
 			handlerutils.RespondWithInternalServerError(w)
 			return
 		}
-		responseDto := chirpCreateResponse{Id: createdChirp.Id, Body: createdChirp.Body}
+		responseDto := chirpCreateResponse{Id: createdChirp.Id, Body: createdChirp.Body, AuthorId: createdChirp.AuthorId}
 		handlerutils.RespondWithJson(w, http.StatusCreated, responseDto)
 	case false:
 		handlerutils.RespondWithError(w, http.StatusBadRequest, "Chirp is too long")

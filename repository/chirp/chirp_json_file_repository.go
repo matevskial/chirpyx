@@ -13,8 +13,8 @@ func NewChirpJsonFileRepository(db *database.JsonFileDB) *ChirpJsonFileRepositor
 	return &ChirpJsonFileRepository{db: db}
 }
 
-func (r *ChirpJsonFileRepository) Create(body string) (chirp.Chirp, error) {
-	return r.db.CreateChirp(body)
+func (r *ChirpJsonFileRepository) Create(body string, authorId int) (chirp.Chirp, error) {
+	return r.db.CreateChirp(body, authorId)
 }
 
 func (r *ChirpJsonFileRepository) FindAll() ([]chirp.Chirp, error) {

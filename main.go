@@ -36,7 +36,7 @@ func main() {
 	authenticationMiddleware := authMiddleware.NewAuthenticationMiddleware(authenticationService)
 
 	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
-	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo)
+	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo, authenticationMiddleware)
 
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)

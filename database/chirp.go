@@ -2,12 +2,12 @@ package database
 
 import chirpDomain "github.com/matevskial/chirpyx/domain/chirp"
 
-func (db *JsonFileDB) CreateChirp(body string) (chirpDomain.Chirp, error) {
+func (db *JsonFileDB) CreateChirp(body string, authorId int) (chirpDomain.Chirp, error) {
 	dbStructure, err := db.loadDB()
 	if err != nil {
 		return chirpDomain.Chirp{}, err
 	}
-	chirp := chirpDomain.Chirp{Id: dbStructure.ChirpIdSeq, Body: body}
+	chirp := chirpDomain.Chirp{Id: dbStructure.ChirpIdSeq, Body: body, AuthorId: authorId}
 	dbStructure.addChirp(chirp)
 	err = db.writeDB(dbStructure)
 	if err != nil {
