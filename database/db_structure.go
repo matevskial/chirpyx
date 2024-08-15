@@ -44,3 +44,12 @@ func (s *DBStructure) updateUser(id int, email string, hashedPassword string) (u
 	s.Users[id] = user
 	return userDomain.User{Id: user.Id, Email: user.Email}, nil
 }
+
+func (s *DBStructure) deleteChirpByIdAndAuthorId(chirpId int, authorId int) error {
+	chirp, exists := s.Chirps[chirpId]
+	if !exists || chirp.AuthorId != authorId {
+		return chirpDomain.ErrChirpNotFound
+	}
+	delete(s.Chirps, chirpId)
+	return nil
+}

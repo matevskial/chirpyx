@@ -30,3 +30,17 @@ func (db *JsonFileDB) GetChirps() ([]chirpDomain.Chirp, error) {
 	}
 	return chirps, nil
 }
+
+func (db *JsonFileDB) DeleteChirpByIdAndAuthorId(id int, authorId int) error {
+	dbStructure, err := db.loadDB()
+	if err != nil {
+		return err
+	}
+
+	err = dbStructure.deleteChirpByIdAndAuthorId(id, authorId)
+	if err != nil {
+		return err
+	}
+
+	return db.writeDB(dbStructure)
+}

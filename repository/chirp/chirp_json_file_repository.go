@@ -35,3 +35,7 @@ func (r *ChirpJsonFileRepository) FindById(id int) (chirp.Chirp, error) {
 
 	return chirp.Chirp{}, chirp.ErrChirpNotFound
 }
+
+func (r *ChirpJsonFileRepository) DeleteByIdAndAuthorId(id int, authorId int) error {
+	return r.db.DeleteChirpByIdAndAuthorId(id, authorId)
+}

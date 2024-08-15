@@ -16,4 +16,5 @@ type ChirpRepository interface {
 	Create(body string, authorId int) (Chirp, error)
 	FindAll() ([]Chirp, error)
 	FindById(id int) (Chirp, error)
+	DeleteByIdAndAuthorId(id int, authorId int) error
 }
