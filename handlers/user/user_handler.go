@@ -2,14 +2,14 @@ package user
 
 import (
 	userDomain "github.com/matevskial/chirpyx/domain/user"
-	"github.com/matevskial/chirpyx/handlers/authentication"
+	"github.com/matevskial/chirpyx/handlers/auth"
 	"net/http"
 )
 
 type UserHandler struct {
 	Path                     string
 	userRepository           userDomain.UserRepository
-	authenticationMiddleware *authentication.AuthenticationMiddleware
+	authenticationMiddleware *auth.AuthenticationMiddleware
 }
 
 type userCreateUpdateRequest struct {
@@ -22,7 +22,7 @@ type userCreateUpdateResponse struct {
 	Email string `json:"email"`
 }
 
-func NewUserHandler(path string, userRepository userDomain.UserRepository, authenticationMiddleware *authentication.AuthenticationMiddleware) *UserHandler {
+func NewUserHandler(path string, userRepository userDomain.UserRepository, authenticationMiddleware *auth.AuthenticationMiddleware) *UserHandler {
 	return &UserHandler{Path: path, userRepository: userRepository, authenticationMiddleware: authenticationMiddleware}
 }
 

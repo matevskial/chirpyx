@@ -4,7 +4,7 @@ import (
 	"github.com/matevskial/chirpyx/auth"
 	"github.com/matevskial/chirpyx/configuration"
 	"github.com/matevskial/chirpyx/database"
-	"github.com/matevskial/chirpyx/handlers/authentication"
+	authHandler "github.com/matevskial/chirpyx/handlers/auth"
 	chirpHandler "github.com/matevskial/chirpyx/handlers/chirp"
 	userHandler "github.com/matevskial/chirpyx/handlers/user"
 	chirpRepository "github.com/matevskial/chirpyx/repository/chirp"
@@ -32,7 +32,7 @@ func main() {
 	httpFileServerMetrics := apiMetrics{}
 	meteredHttpFileServer := httpFileServerMetrics.meteredHandler(http.FileServer(staticContentDir))
 
-	authenticationMiddleware := authentication.NewAuthenticationMiddleware(jwtService)
+	authenticationMiddleware := authHandler.NewAuthenticationMiddleware(jwtService)
 
 	chirpRepo := chirpRepository.NewChirpJsonFileRepository(db)
 	chirpHndlr := chirpHandler.NewChirpHandler(chirpRepo)
@@ -40,7 +40,7 @@ func main() {
 	userRepo := userRepository.NewUserJsonFileRepository(db)
 	userHndlr := userHandler.NewUserHandler("/api/users", userRepo, authenticationMiddleware)
 
-	authenticationHndlr := authentication.NewAuthenticationHandler("/api/login", userRepo, jwtService, refreshTokenService)
+	authenticationHndlr := authHandler.NewAuthenticationHandler("/api/login", userRepo, jwtService, refreshTokenService)
 
 	httpServeMux := http.NewServeMux()
 
