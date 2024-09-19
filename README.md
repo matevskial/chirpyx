@@ -11,3 +11,7 @@ Alternatively, make sure you are in the root of the main package(usually where `
 `go run .`
 
 Then exit the server using shortcut `CTRL-C`.
+
+# USeful resources for go
+
+* https://www.alexedwards.net/blog/a-time-saving-makefile-for-your-go-projects
